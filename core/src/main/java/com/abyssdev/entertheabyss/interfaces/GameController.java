@@ -1,0 +1,17 @@
+package com.abyssdev.entertheabyss.interfaces;
+
+public interface GameController {
+    void connect(int numPlayer);
+    void start();
+    void updatePlayerPosition(int numPlayer, float x, float y);
+    void updatePlayerAnimation(int numPlayer, String action, String direction);
+    void updateEnemyDead(int enemyId);
+    void updateBossDead();
+    void updateCoins(int numPlayer, int coins);
+    void updateHealth(int numPlayer, int health);
+    void updateRoomChange(String roomId);
+    void playerAttack(int numPlayer);
+    void endGame(int winner);
+    void backToMenu();
+    void syncEnemies(String enemiesData);
+}
