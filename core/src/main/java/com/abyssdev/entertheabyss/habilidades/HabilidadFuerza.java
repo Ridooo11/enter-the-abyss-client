@@ -9,6 +9,7 @@ public class HabilidadFuerza extends Habilidad {
 
     @Override
     public void aplicar(Jugador jugador) {
-        jugador.aumentarDanio(1);
+
+        //jugador.aumentarDanio(1);
     }
 }

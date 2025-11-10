@@ -9,6 +9,7 @@ public class HabilidadRegeneracion extends Habilidad {
 
     @Override
     public void aplicar(Jugador jugador) {
-        jugador.activarRegeneracion(1); // método que regenere 1 punto por segundo
+
+        //jugador.activarRegeneracion(1); // método que regenere 1 punto por segundo
     }
 }

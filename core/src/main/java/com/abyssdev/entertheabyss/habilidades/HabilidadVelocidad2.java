@@ -12,6 +12,7 @@ public class HabilidadVelocidad2 extends Habilidad {
 
     @Override
     public void aplicar(Jugador jugador) {
-        jugador.aumentarVelocidad(1.2f);
+
+        //jugador.aumentarVelocidad(1.2f);
     }
 }

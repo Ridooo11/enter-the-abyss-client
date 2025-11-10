@@ -107,7 +107,7 @@ public class PantallaArbolHabilidades extends Pantalla {
         font.draw(batch, layout, (viewport.getWorldWidth() - layout.width) / 2, viewport.getWorldHeight() - 40);
 
         font.setColor(Color.YELLOW);
-        font.draw(batch, "Monedas: " + jugador.getMonedas(), 50, 50);
+       // font.draw(batch, "Monedas: " + jugador.getMonedas(), 50, 50);
 
         // Dibuja el panel de detalle de la habilidad seleccionada
         if (habilidadSeleccionada != null) {
@@ -430,14 +430,14 @@ public class PantallaArbolHabilidades extends Pantalla {
         }
 
         // Verificar monedas
-        if (jugador.getMonedas() < habilidad.getCosto()) {
+       /* if (jugador.getMonedas() < habilidad.getCosto()) {
             mostrarMensaje("Monedas insuficientes.");
             Sonidos.reproducirCompraFallida();
             return;
-        }
+        }*/
 
         // Compra válida
-        jugador.modificarMonedas(-habilidad.getCosto());
+       // jugador.modificarMonedas(-habilidad.getCosto());
         habilidad.comprada = true;
         habilidad.aplicar(jugador);
         mostrarMensaje("¡Compra exitosa! " + habilidad.getNombre() + " mejorada.");

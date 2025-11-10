@@ -5,13 +5,17 @@ public interface GameController {
     void start();
     void updatePlayerPosition(int numPlayer, float x, float y);
     void updatePlayerAnimation(int numPlayer, String action, String direction);
+    void updateEnemyPosition(int id, float x, float y);
+    void updateEnemyAnimation(int id, String action, String direction);
     void updateEnemyDead(int enemyId);
     void updateBossDead();
     void updateCoins(int numPlayer, int coins);
     void updateHealth(int numPlayer, int health);
     void updateRoomChange(String roomId);
+    void updateDoorOpened(String roomId);
     void playerAttack(int numPlayer);
-    void endGame(int winner);
+    void endGame();
     void backToMenu();
     void syncEnemies(String enemiesData);
+    void spawnEnemy(int id, float x, float y);
 }

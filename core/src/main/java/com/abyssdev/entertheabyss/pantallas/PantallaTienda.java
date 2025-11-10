@@ -84,7 +84,7 @@ public class PantallaTienda extends Pantalla {
 
         // Mostrar monedas del jugador
         font.setColor(Color.YELLOW);
-        font.draw(batch, "Tus monedas: " + jugador.getMonedas(), ancho / 2f - 80, 100);
+       // font.draw(batch, "Tus monedas: " + jugador.getMonedas(), ancho / 2f - 80, 100);
         font.setColor(Color.WHITE);
 
         // Opciones
@@ -117,7 +117,7 @@ public class PantallaTienda extends Pantalla {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             switch (opcionSeleccionada) {
                 case 0:
-                    comprarCorazon();
+                   // comprarCorazon();
                     break;
                 case 1:
                     // volver al juego
@@ -132,7 +132,7 @@ public class PantallaTienda extends Pantalla {
         }
     }
 
-    private void comprarCorazon() {
+   /* private void comprarCorazon() {
         if (jugador.getMonedas() >= precioCorazon) {
             if(jugador.getVida() >= jugador.getVidaMaxima()){
                 Sonidos.reproducirCompraFallida();
@@ -147,7 +147,7 @@ public class PantallaTienda extends Pantalla {
             Sonidos.reproducirCompraFallida();
             Gdx.app.log("TIENDA", "No tenés suficientes monedas!");
         }
-    }
+    }*/
 
     @Override
     public void resize(int width, int height) {

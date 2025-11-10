@@ -12,5 +12,8 @@ public class ZonaTransicion extends Rectangle {
         super(x, y, w, h);
         this.destinoSalaId = destino;
         this.spawnName = spawnName;
+
     }
+
+
 }

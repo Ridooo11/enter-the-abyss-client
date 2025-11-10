@@ -13,7 +13,6 @@ import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.Timer;
 
 import java.util.ArrayList;
 
@@ -26,19 +25,17 @@ public class Sala {
     private Array<Rectangle> colisionesDinamicas;   // ✅ Puertas (pueden desaparecer)
     private Array<Rectangle> colisiones;            // ✅ Todas las colisiones combinadas
     private Array<ZonaTransicion> zonasTransicion;
-    private ArrayList<Enemigo> enemigos;
+    private ArrayList<Enemigo> enemigos = new ArrayList<>();
     private Boss bossFinal;
     private boolean bossGenerado = false;
     private Array<SpawnPoint> spawnPoints;
     private Array<Puerta> puertas;
-    private int cantidadEnemigos;
     private boolean enemigosGenerados = false;
     private float anchoTiles, altoTiles;
     private static final float TILE_SIZE = 16f;
 
-    public Sala(String id, String rutaTmx, int cantidadEnemigos) {
+    public Sala(String id, String rutaTmx) {
         this.id = id;
-        this.cantidadEnemigos = cantidadEnemigos;
         cargarMapa(rutaTmx);
         cargarColisiones();
         cargarPuertas();
@@ -189,63 +186,6 @@ public class Sala {
         }
     }
 
-    public void generarEnemigos() {
-        enemigos = new ArrayList<>();
-
-        for (int i = 0; i < cantidadEnemigos; i++) {
-            final int delay = i;
-
-            Timer.schedule(new Timer.Task() {
-                @Override
-                public void run() {
-                    Enemigo nuevoEnemigo = null;
-                    int intentos = 0;
-                    final int MAX_INTENTOS = 50; // Evitar bucle infinito
-
-                    while (nuevoEnemigo == null && intentos < MAX_INTENTOS) {
-                        float x = MathUtils.random(2f, getAnchoMundo() - 2f);
-                        float y = MathUtils.random(2f, getAltoMundo() - 2f);
-
-                        // Crear rectángulo temporal para verificar colisión
-                        Rectangle rectTemp = new Rectangle(x, y, Enemigo.getTamaño(), Enemigo.getTamaño());
-
-                        boolean colisiona = false;
-
-                        // Verificar colisiones con paredes
-                        for (Rectangle r : colisiones) {
-                            if (rectTemp.overlaps(r)) {
-                                colisiona = true;
-                                break;
-                            }
-                        }
-
-                        // Verificar colisiones con otros enemigos ya generados
-                        if (!colisiona) {
-                            for (Enemigo e : enemigos) {
-                                if (rectTemp.overlaps(e.getRectangulo())) {
-                                    colisiona = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (!colisiona) {
-                            nuevoEnemigo = new Enemigo(x, y,3f,2f,10);
-                        }
-
-                        intentos++;
-                    }
-
-                    if (nuevoEnemigo != null) {
-                        enemigos.add(nuevoEnemigo);
-                        System.out.println("✅ Enemigo generado en (" + nuevoEnemigo.getPosicion().x + ", " + nuevoEnemigo.getPosicion().y + ")");
-                    } else {
-                        System.err.println("❌ No se pudo generar enemigo después de " + MAX_INTENTOS + " intentos.");
-                    }
-                }
-            }, delay * 1.5f);
-        }
-    }
 
     public void generarBoss() {
         Boss nuevoBoss = null;
@@ -316,6 +256,26 @@ public class Sala {
         }
     }
 
+    public void abrirPuertasDesdeServidor() {
+        if (puertas == null || puertas.size == 0) return;
+
+        boolean algunaAbierta = false;
+
+        for (int i = 0; i < puertas.size; i++) {
+            Puerta puerta = puertas.get(i);
+            if (puerta != null && !puerta.estaAbierta()) {
+                puerta.abrir();              // cambia tiles y reproduce sonido local si corresponde
+                algunaAbierta = true;
+                System.out.println("🚪 Cliente: puerta " + i + " abierta en sala " + id);
+            }
+        }
+
+        if (algunaAbierta) {
+            // Reconstruir colisiones locales del cliente
+            actualizarColisiones();
+        }
+    }
+
     public boolean hayEnemigosVivos() {
         if (this.enemigos == null) return false;
         for (Enemigo e : this.enemigos) {
@@ -372,6 +332,7 @@ public class Sala {
         System.out.println("🔄 Colisiones actualizadas: " + colisiones.size + " totales");
     }
 
+
     // GETTERS
     public String getId() { return this.id; }
     public TiledMap getMapa() { return this.mapa; }
@@ -394,4 +355,7 @@ public class Sala {
         if (mapa != null) mapa.dispose();
         if (renderer != null) renderer.dispose();
     }
+
+
+
 }

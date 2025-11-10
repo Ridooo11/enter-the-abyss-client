@@ -9,6 +9,7 @@ public class HabilidadGolpeCritico extends Habilidad {
 
     @Override
     public void aplicar(Jugador jugador) {
-        jugador.aumentarDanio(2);
+
+        //jugador.aumentarDanio(2);
     }
 }

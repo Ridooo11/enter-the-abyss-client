@@ -9,6 +9,6 @@ public class HabilidadAtaqueVeloz extends Habilidad {
 
     @Override
     public void aplicar(Jugador jugador) {
-        jugador.reducirCooldownAtaque(0.3f);
+       // jugador.reducirCooldownAtaque(0.3f);
     }
 }

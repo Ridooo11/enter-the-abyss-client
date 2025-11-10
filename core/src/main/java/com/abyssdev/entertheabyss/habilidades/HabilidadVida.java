@@ -9,6 +9,7 @@ public class HabilidadVida extends Habilidad {
 
     @Override
     public void aplicar(Jugador jugador) {
-        jugador.aumentarVidaMaxima(20);
+
+        //jugador.aumentarVidaMaxima(20);
     }
 }

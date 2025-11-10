@@ -1,13 +1,16 @@
 package com.abyssdev.entertheabyss.ui;
 
-import com.badlogic.gdx.Gdx;
+import com.abyssdev.entertheabyss.personajes.Jugador;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.abyssdev.entertheabyss.personajes.Jugador;
 
+/**
+ * HUD - Interfaz de usuario
+ * Muestra vida y monedas recibidas del servidor
+ */
 public class Hud {
     private Jugador jugador;
     private Texture heart100;
@@ -17,14 +20,19 @@ public class Hud {
     private Texture moneda;
     private BitmapFont font;
     private GlyphLayout layout;
-    private Viewport viewport; // Añadir viewport
+    private Viewport viewport;
 
     private float heartWidth = 32f;
     private float heartHeight = 32f;
     private float startX = 20f;
-    private float startY = 0f; // Se ajustará en draw()
+    private float startY = 0f;
     private float monedaX = 0f;
     private float monedaY = 0f;
+
+    // Valores recibidos del servidor
+    private int vidaActual = 100;
+    private int vidaMaxima = 100;
+    private int monedasActual = 0;
 
     public Hud(Jugador jugador, Viewport viewport) {
         this.jugador = jugador;
@@ -39,7 +47,6 @@ public class Hud {
         this.layout = new GlyphLayout();
     }
 
-
     public void draw(SpriteBatch batch) {
         // Guardar proyección original
         com.badlogic.gdx.math.Matrix4 originalProjection = batch.getProjectionMatrix().cpy();
@@ -51,10 +58,7 @@ public class Hud {
         float screenHeight = viewport.getScreenHeight();
 
         // --- DIBUJAR CORAZONES ---
-        int vidaActual = jugador.getVida();
-        int vidaMaxima = jugador.getVidaMaxima(); // Ejemplo: 100 o 120
-
-        int corazonesTotales = (int)Math.ceil(vidaMaxima / 20f); // 🔹 1 corazón por cada 20 puntos
+        int corazonesTotales = (int)Math.ceil(vidaMaxima / 20f);
         startX = 20f;
         startY = screenHeight - 60f;
 
@@ -65,7 +69,6 @@ public class Hud {
             int vidaRestante = vidaActual - (i * vidaPorCorazon);
 
             if (vidaRestante <= 0) {
-                // 🔹 Si el jugador tiene menos vida que el inicio de este corazón, se dibuja vacío o nada
                 continue;
             }
 
@@ -84,14 +87,12 @@ public class Hud {
         }
 
         // --- DIBUJAR MONEDAS ---
-        int monedas = jugador.getMonedas();
-
         monedaX = screenWidth - 120f;
         monedaY = 20f;
 
         batch.draw(moneda, monedaX, monedaY);
 
-        String textoMonedas = "x" + monedas;
+        String textoMonedas = "x" + monedasActual;
         layout.setText(font, textoMonedas);
         float textoX = monedaX + moneda.getWidth() + 5f;
         float textoY = monedaY + moneda.getHeight() / 2f + font.getLineHeight() / 2f;
@@ -103,25 +104,27 @@ public class Hud {
         batch.setProjectionMatrix(originalProjection);
     }
 
+    /**
+     * Actualiza la vida mostrada (recibida del servidor)
+     */
+    public void actualizarVida(int vida, int vidaMaxima) {
+        this.vidaActual = vida;
+        this.vidaMaxima = vidaMaxima;
+    }
+
+    /**
+     * Actualiza las monedas mostradas (recibidas del servidor)
+     */
+    public void actualizarMonedas(int monedas) {
+        this.monedasActual = monedas;
+    }
+
     public void dispose() {
-        if (heart100 != null) {
-            heart100.dispose();
-        }
-        if (heart75 != null) {
-            heart75.dispose();
-        }
-        if (heart50 != null) {
-            heart50.dispose();
-        }
-        if (heart25 != null) {
-            heart25.dispose();
-        }
-        if (moneda != null) {
-            moneda.dispose();
-        }
-        if (font != null) {
-            font.dispose();
-        }
-        // ✅ GlyphLayout no necesita dispose()
+        if (heart100 != null) heart100.dispose();
+        if (heart75 != null) heart75.dispose();
+        if (heart50 != null) heart50.dispose();
+        if (heart25 != null) heart25.dispose();
+        if (moneda != null) moneda.dispose();
+        if (font != null) font.dispose();
     }
 }

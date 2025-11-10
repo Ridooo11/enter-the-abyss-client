@@ -1,68 +1,61 @@
 package com.abyssdev.entertheabyss.logica;
 
+import com.abyssdev.entertheabyss.network.ClientThread;
 import com.abyssdev.entertheabyss.personajes.Jugador;
-import com.badlogic.gdx.Input; // Importar la clase Input
-import com.badlogic.gdx.InputProcessor; // Importar la interfaz InputProcessor
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 
 public class ManejoEntradas implements InputProcessor {
     private Jugador jugador;
+    private ClientThread clientThread;
 
-    public ManejoEntradas(Jugador jugador) {
+    private boolean arriba, abajo, izquierda, derecha;
+
+    public ManejoEntradas(Jugador jugador, ClientThread clientThread) {
         this.jugador = jugador;
+        this.clientThread = clientThread;
     }
 
     @Override
     public boolean keyDown(int keycode) {
         switch (keycode) {
-            // Controles de movimiento
-            case Input.Keys.W:
-                jugador.moverArriba(true);
-                break;
-            case Input.Keys.S:
-                jugador.moverAbajo(true);
-                break;
-            case Input.Keys.A:
-                jugador.moverIzquierda(true);
-                break;
-            case Input.Keys.D:
-                jugador.moverDerecha(true);
-                break;
-            // Tecla de ataque (ESPACIO)
+            case Input.Keys.W: arriba = true; break;
+            case Input.Keys.S: abajo = true; break;
+            case Input.Keys.A: izquierda = true; break;
+            case Input.Keys.D: derecha = true; break;
             case Input.Keys.SPACE:
-                jugador.atacar(); // Llama al método atacar() del jugador
+                clientThread.sendMessage("Attack");
                 break;
             case Input.Keys.SHIFT_LEFT:
             case Input.Keys.SHIFT_RIGHT:
-                jugador.intentarEvasion();
+                clientThread.sendMessage("Dash");
                 break;
         }
-        return true; // Indica que el evento ha sido manejado
+
+        // Cada vez que cambia un input de movimiento, se manda el estado completo
+        enviarEstado();
+        return true;
     }
 
     @Override
     public boolean keyUp(int keycode) {
         switch (keycode) {
-            // Controles de movimiento
-            case Input.Keys.W:
-                jugador.moverArriba(false);
-                break;
-            case Input.Keys.S:
-                jugador.moverAbajo(false);
-                break;
-            case Input.Keys.A:
-                jugador.moverIzquierda(false);
-                break;
-            case Input.Keys.D:
-                jugador.moverDerecha(false);
-                break;
-            // Para la tecla ESPACIO, no necesitas hacer nada en keyUp
-            // porque la acción de ataque se inicia en keyDown y es gestionada
-            // por la propia clase Jugador (animación, hitbox).
+            case Input.Keys.W: arriba = false; break;
+            case Input.Keys.S: abajo = false; break;
+            case Input.Keys.A: izquierda = false; break;
+            case Input.Keys.D: derecha = false; break;
         }
-        return true; // Indica que el evento ha sido manejado
+
+        enviarEstado();
+        return true;
     }
 
-    // Métodos de InputProcessor que no se utilizan en este contexto
+    private void enviarEstado() {
+        String mensaje = "Input:" + arriba + ":" + abajo + ":" + izquierda + ":" + derecha;
+        clientThread.sendMessage(mensaje);
+    }
+
+    // Métodos no usados
     @Override public boolean keyTyped(char character) { return false; }
     @Override public boolean touchDown(int screenX, int screenY, int pointer, int button) { return false; }
     @Override public boolean touchUp(int screenX, int screenY, int pointer, int button) { return false; }

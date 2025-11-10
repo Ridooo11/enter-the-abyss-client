@@ -170,8 +170,10 @@ public class Enemigo {
         float drawX = posicion.x;
         float drawY = posicion.y;
 
+
         TextureRegion frameRender = new TextureRegion(frame);
 
+        // Reflejar si es necesario
         if (haciaIzquierda && !frameRender.isFlipX()) {
             frameRender.flip(true, false);
         } else if (!haciaIzquierda && frameRender.isFlipX()) {
@@ -225,6 +227,48 @@ public class Enemigo {
         }
     }
 
+    public void setX(float x) {
+        this.posicion.x = x;
+    }
+
+    public void setY(float y) {
+        this.posicion.y = y;
+    }
+
+    public void actualizarDesdeServidor(float x, float y, String action, String direction) {
+        // Actualizar posición directamente
+        this.posicion.set(x, y);
+
+        // Actualizar dirección (para invertir el sprite si hace falta)
+        if (direction != null) {
+            this.haciaIzquierda = direction.equalsIgnoreCase("IZQUIERDA");
+        }
+
+        // Determinar el estado según el string recibido
+        switch (action.toUpperCase()) {
+            case "CAMINAR":
+                cambiarEstado(Accion.CAMINAR);
+                break;
+            case "ATAQUE":
+                cambiarEstado(Accion.ATAQUE);
+                break;
+            case "HIT":
+                cambiarEstado(Accion.HIT);
+                break;
+            case "MUERTE":
+                cambiarEstado(Accion.MUERTE);
+                break;
+            default:
+                cambiarEstado(Accion.ESTATICO);
+                break;
+        }
+
+        // Reiniciar el tiempo de animación si cambió el estado
+        this.tiempoEstado = 0f;
+    }
+
+
+
     public Rectangle getRectangulo() {
         return new Rectangle(posicion.x, posicion.y, TAMANO, TAMANO);
     }
@@ -251,5 +295,9 @@ public class Enemigo {
 
     public int getDanio() {
         return this.danio;
+    }
+
+    public void update(float delta) {
+        tiempoEstado += delta;
     }
 }

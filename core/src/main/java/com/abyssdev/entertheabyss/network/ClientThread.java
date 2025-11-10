@@ -1,25 +1,38 @@
 package com.abyssdev.entertheabyss.network;
 
 import com.abyssdev.entertheabyss.interfaces.GameController;
+import com.abyssdev.entertheabyss.mapas.Sala;
+import com.abyssdev.entertheabyss.mapas.ZonaTransicion;
+import com.abyssdev.entertheabyss.pantallas.PantallaJuego;
+import com.abyssdev.entertheabyss.personajes.Enemigo;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Array;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
 
+/**
+ * ClientThread - Versión CLIENTE
+ * Maneja la comunicación del cliente con el servidor
+ */
 public class ClientThread extends Thread {
 
     private DatagramSocket socket;
     private int serverPort = 9999;
-    private String ipServerStr = "127.0.0.1";
+    private String ipServerStr = "127.0.0.1"; // Localhost por defecto
     private InetAddress ipServer;
     private boolean end = false;
-    private GameController gameController;
+    private PantallaJuego gameController;
 
-    public ClientThread(GameController gameController) {
+    public ClientThread(PantallaJuego gameController) {
         try {
             this.gameController = gameController;
             ipServer = InetAddress.getByName(ipServerStr);
             socket = new DatagramSocket();
-            System.out.println("🌐 Cliente creado. Conectando a " + ipServerStr + ":" + serverPort);
+            socket.setSoTimeout(0); // Sin timeout
+
+            System.out.println("🌐 Cliente creado. Servidor: " + ipServerStr + ":" + serverPort);
         } catch (SocketException | UnknownHostException e) {
             System.err.println("❌ Error al crear cliente: " + e.getMessage());
         }
@@ -28,17 +41,19 @@ public class ClientThread extends Thread {
     @Override
     public void run() {
         System.out.println("🔄 Cliente escuchando mensajes del servidor...");
-        do {
-            DatagramPacket packet = new DatagramPacket(new byte[2048], 2048); // Aumentado para enemigos
+
+        while (!end) {
+            DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
             try {
                 socket.receive(packet);
                 processMessage(packet);
             } catch (IOException e) {
-                if(!end) {
+                if (!end) {
                     System.err.println("❌ Error al recibir paquete: " + e.getMessage());
                 }
             }
-        } while(!end);
+        }
+
         System.out.println("🔴 Cliente desconectado");
     }
 
@@ -46,17 +61,21 @@ public class ClientThread extends Thread {
         String message = (new String(packet.getData())).trim();
         String[] parts = message.split(":");
 
-        System.out.println("📨 Mensaje recibido: " + message);
+        System.out.println("📨 Servidor: " + message);
 
-        switch(parts[0]){
+        switch (parts[0]) {
             case "AlreadyConnected":
                 System.out.println("⚠️ Ya estás conectado al servidor");
                 break;
 
             case "Connected":
-                System.out.println("✅ Conectado al servidor como jugador " + parts[1]);
-                this.ipServer = packet.getAddress();
-                gameController.connect(Integer.parseInt(parts[1]));
+                // Connected:numPlayer
+                if (parts.length >= 2) {
+                    int numPlayer = Integer.parseInt(parts[1]);
+                    System.out.println("✅ Conectado como jugador " + numPlayer);
+                    this.ipServer = packet.getAddress();
+                    gameController.connect(numPlayer);
+                }
                 break;
 
             case "Full":
@@ -66,100 +85,159 @@ public class ClientThread extends Thread {
 
             case "Start":
                 System.out.println("🎮 ¡Juego iniciado!");
-                this.gameController.start();
+                gameController.start();
                 break;
 
-            case "UpdatePosition":
-                // UpdatePosition:Player:numPlayer:x:y:action:direction
-                if(parts[1].equals("Player")) {
-                    int numPlayer = Integer.parseInt(parts[2]);
+            case "Update":
+                // Update:tipo:id:x:y:action:direction
+                if (parts.length >= 7) {
+                    String tipo = parts[1];
+                    int id = Integer.parseInt(parts[2]);
                     float x = Float.parseFloat(parts[3]);
                     float y = Float.parseFloat(parts[4]);
-                    String action = parts.length > 5 ? parts[5] : "ESTATICO";
-                    String direction = parts.length > 6 ? parts[6] : "ABAJO";
+                    String action = parts[5];
+                    String direction = parts[6];
 
-                    this.gameController.updatePlayerPosition(numPlayer, x, y);
-                    this.gameController.updatePlayerAnimation(numPlayer, action, direction);
+                    if (tipo.equalsIgnoreCase("Jugador")) {
+                        gameController.updatePlayerPosition(id, x, y);
+                        gameController.updatePlayerAnimation(id, action, direction);
+                    } else if (tipo.equalsIgnoreCase("Enemigo")) {
+                        gameController.updateEnemyPosition(id, x, y);
+                        gameController.updateEnemyAnimation(id, action, direction);
+                    }
                 }
                 break;
 
+            case "SpawnEnemy":
+                // SpawnEnemy:id:x:y
+                if (parts.length >= 4) {
+                    int id = Integer.parseInt(parts[1]);
+                    float x = Float.parseFloat(parts[2]);
+                    float y = Float.parseFloat(parts[3]);
+
+                    Gdx.app.postRunnable(() -> {
+                        gameController.spawnEnemy(id, x, y);
+                    });
+                }
+                break;
+
+
             case "EnemyDead":
                 // EnemyDead:enemyId
-                int enemyId = Integer.parseInt(parts[1]);
-                this.gameController.updateEnemyDead(enemyId);
+                if (parts.length >= 2) {
+                    int enemyId = Integer.parseInt(parts[1]);
+                    gameController.updateEnemyDead(enemyId);
+                }
                 break;
 
             case "BossDead":
-                this.gameController.updateBossDead();
+                gameController.updateBossDead();
                 break;
 
             case "UpdateCoins":
                 // UpdateCoins:numPlayer:coins
-                int numPlayer = Integer.parseInt(parts[1]);
-                int coins = Integer.parseInt(parts[2]);
-                this.gameController.updateCoins(numPlayer, coins);
+                if (parts.length >= 3) {
+                    int numPlayer = Integer.parseInt(parts[1]);
+                    int coins = Integer.parseInt(parts[2]);
+                    gameController.updateCoins(numPlayer, coins);
+                }
                 break;
 
             case "UpdateHealth":
                 // UpdateHealth:numPlayer:health
-                int playerNum = Integer.parseInt(parts[1]);
-                int health = Integer.parseInt(parts[2]);
-                this.gameController.updateHealth(playerNum, health);
+                if (parts.length >= 3) {
+                    int playerNum = Integer.parseInt(parts[1]);
+                    int health = Integer.parseInt(parts[2]);
+                    gameController.updateHealth(playerNum, health);
+                }
                 break;
 
             case "RoomChange":
                 // RoomChange:roomId
-                String roomId = parts[1];
-                this.gameController.updateRoomChange(roomId);
+                if (parts.length >= 2) {
+                    String roomId = parts[1];
+                    gameController.updateRoomChange(roomId);
+                }
                 break;
+
 
             case "PlayerAttack":
                 // PlayerAttack:numPlayer
-                int attackingPlayer = Integer.parseInt(parts[1]);
-                this.gameController.playerAttack(attackingPlayer);
+                if (parts.length >= 2) {
+                    int attackingPlayer = Integer.parseInt(parts[1]);
+                    gameController.playerAttack(attackingPlayer);
+                }
                 break;
 
             case "EndGame":
-                // EndGame:winner
-                int winner = Integer.parseInt(parts[1]);
-                this.gameController.endGame(winner);
+                gameController.endGame();
                 break;
 
             case "Disconnect":
                 System.out.println("🔌 Servidor desconectado");
-                this.gameController.backToMenu();
+                gameController.backToMenu();
+                this.end = true;
                 break;
 
             case "NotConnected":
                 System.out.println("⚠️ No estás conectado al servidor");
                 break;
 
+            case "DoorOpened":
+                if (parts.length >= 2) {
+                    String salaId = parts[1];
+                    Gdx.app.postRunnable(() -> {
+                        Sala sala = this.gameController.getMapaActual().getSala(salaId);
+                        if (sala != null) {
+                            sala.abrirPuertasDesdeServidor();
+                        } else {
+                            System.err.println("⚠️ Cliente: no se encontró sala " + salaId + " para DoorOpened");
+                        }
+                    });
+                }
+                break;
+
+
             case "SyncEnemies":
                 // SyncEnemies:x1,y1;x2,y2;x3,y3...
-                if(parts.length > 1) {
+                if (parts.length > 1) {
                     String enemiesData = parts[1];
-                    this.gameController.syncEnemies(enemiesData);
+                    gameController.syncEnemies(enemiesData);
                 }
+                break;
+
+            default:
+                System.out.println("⚠️ Mensaje desconocido: " + parts[0]);
                 break;
         }
     }
 
     public void sendMessage(String message) {
+        if (socket == null || socket.isClosed()) {
+            System.err.println("⚠️ Socket cerrado, no se puede enviar: " + message);
+            return;
+        }
+
         byte[] byteMessage = message.getBytes();
         DatagramPacket packet = new DatagramPacket(byteMessage, byteMessage.length, ipServer, serverPort);
+
         try {
             socket.send(packet);
-            System.out.println("📤 Enviado: " + message);
+            // System.out.println("📤 Enviado: " + message);
         } catch (IOException e) {
             System.err.println("❌ Error al enviar mensaje: " + e.getMessage());
         }
     }
 
     public void terminate() {
+        System.out.println("🛑 Terminando cliente...");
+
         this.end = true;
-        if(socket != null && !socket.isClosed()) {
+
+        if (socket != null && !socket.isClosed()) {
             socket.close();
         }
+
         this.interrupt();
     }
 
@@ -171,5 +249,10 @@ public class ClientThread extends Thread {
         } catch (UnknownHostException e) {
             System.err.println("❌ IP inválida: " + e.getMessage());
         }
+    }
+
+    public void setServerPort(int port) {
+        this.serverPort = port;
+        System.out.println("🔌 Puerto del servidor actualizado a: " + port);
     }
 }

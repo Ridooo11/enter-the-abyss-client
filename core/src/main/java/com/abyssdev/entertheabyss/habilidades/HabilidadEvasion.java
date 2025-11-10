@@ -9,6 +9,6 @@ public class HabilidadEvasion extends Habilidad {
 
     @Override
     public void aplicar(Jugador jugador) {
-        jugador.habilitarEvasion(true);
+        //jugador.habilitarEvasion(true);
     }
 }
