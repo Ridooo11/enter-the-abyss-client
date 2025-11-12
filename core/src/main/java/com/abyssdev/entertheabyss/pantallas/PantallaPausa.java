@@ -5,6 +5,7 @@ import com.abyssdev.entertheabyss.ui.FontManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -31,6 +32,8 @@ public class PantallaPausa extends Pantalla {
     private GlyphLayout layout;
     private Viewport viewport;
     private OrthographicCamera camara;
+
+    private InputProcessor inputAnterior;
 
     public PantallaPausa(Game juego, SpriteBatch batch, PantallaJuego pantallaJuego) {
         super(juego, batch);
@@ -113,6 +116,7 @@ public class PantallaPausa extends Pantalla {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             switch (opcionSeleccionada) {
                 case 0:
+                    if (inputAnterior != null) pantallaJuego.setInputProcessor(inputAnterior);
                     juego.setScreen(pantallaJuego);
                     break;
                 case 1:
@@ -128,6 +132,7 @@ public class PantallaPausa extends Pantalla {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            if (inputAnterior != null) pantallaJuego.setInputProcessor(inputAnterior);
             juego.setScreen(pantallaJuego);
         }
     }
@@ -137,5 +142,9 @@ public class PantallaPausa extends Pantalla {
         if (fondoPausa != null) {
             fondoPausa.dispose();
         }
+    }
+
+    public void setInputAnterior(InputProcessor inputActual) {
+        this.inputAnterior = inputAnterior;
     }
 }

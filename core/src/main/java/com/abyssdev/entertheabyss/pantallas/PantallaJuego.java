@@ -1,5 +1,6 @@
 package com.abyssdev.entertheabyss.pantallas;
 
+import com.abyssdev.entertheabyss.habilidades.*;
 import com.abyssdev.entertheabyss.logica.ManejoEntradas;
 import com.abyssdev.entertheabyss.personajes.Jugador;
 import com.abyssdev.entertheabyss.network.ClientThread;
@@ -12,6 +13,7 @@ import com.abyssdev.entertheabyss.ui.Hud;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -22,6 +24,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * PantallaJuegoCliente - Versión CLIENTE
@@ -39,7 +42,7 @@ public class PantallaJuego extends Pantalla implements GameController {
 
     private ArrayList<Rectangle> zonasTransicion = new ArrayList<>();
     private HashMap<Rectangle, ZonaTransicion> mapaZonas = new HashMap<>();
-
+    private ManejoEntradas inputProcessor;
     // 🌐 Red
     private ClientThread clientThread;
     private boolean conectado = false;
@@ -62,11 +65,15 @@ public class PantallaJuego extends Pantalla implements GameController {
     private boolean faseSubida = true;
     private String salaDestinoId = null;
 
+    //Tienda
+    private boolean jugadorCercaDeOgrini = false;
+    private final float DISTANCIA_INTERACCION = 1.5f;
+
     // 📊 HUD
     private Hud hud;
     private int vidaLocal = 100;
     private int vidaMaximaLocal = 100;
-    private int monedasLocal = 0;
+
 
     // ⌨️ Estado de inputs (para enviar al servidor)
     private boolean arriba, abajo, izquierda, derecha;
@@ -76,48 +83,63 @@ public class PantallaJuego extends Pantalla implements GameController {
     private BitmapFont font;
     private String mensajeEspera = "Conectando al servidor...";
 
+    private Map<String, Habilidad> habilidadesCliente;
+
+    private PantallaPausa pantallaPausa;
+    private PantallaArbolHabilidades pantallaHabilidades;
+
+    private boolean yaInicializado = false;
+
+
     public PantallaJuego(Game juego, SpriteBatch batch) {
         super(juego, batch);
     }
 
     @Override
     public void show() {
-        System.out.println("🎮 CLIENTE INICIADO");
+        if (!yaInicializado) {
 
-        // Inicializar cámara y viewport
-        camara = new OrthographicCamera();
-        viewport = new FitViewport(32, 32 * (9f / 16f), camara);
-        texturaFade = generarTextura();
-
-        // Font para mensajes
-        font = new BitmapFont();
-        font.getData().setScale(2f);
-        font.setColor(Color.WHITE);
-
-        // Inicializar mapa (solo para renderizado)
-        mapaActual = new Mapa("mazmorra1");
-        mapaActual.agregarSala(new Sala("sala1", "maps/mapa1_sala1.tmx"));
-        mapaActual.agregarSala(new Sala("sala2", "maps/mapa1_sala2.tmx"));
-        mapaActual.agregarSala(new Sala("sala5", "maps/mapa2_posible.tmx"));
-        mapaActual.agregarSala(new Sala("sala4", "maps/mapa1_sala4.tmx"));
-        mapaActual.agregarSala(new Sala("sala3", "maps/mapa1_sala5.tmx"));
-
-        salaActual = mapaActual.getSala("sala1");
+            camara = new OrthographicCamera();
+            viewport = new FitViewport(32, 32 * (9f / 16f), camara);
+            texturaFade = generarTextura();
 
 
-        // Conectar al servidor
-        clientThread = new ClientThread(this);
-        clientThread.start();
+            mapaActual = new Mapa("mazmorra1");
+            mapaActual.agregarSala(new Sala("sala1", "maps/mapa1_sala1.tmx"));
+            mapaActual.agregarSala(new Sala("sala2", "maps/mapa1_sala2.tmx"));
+            mapaActual.agregarSala(new Sala("sala4", "maps/mapa1_sala4.tmx"));
+            mapaActual.agregarSala(new Sala("sala3", "maps/mapa1_sala5.tmx"));
+            mapaActual.agregarSala(new Sala("sala5", "maps/mapa2_posible.tmx"));
+            salaActual = mapaActual.getSala("sala1");
+            mapaActual.establecerSalaActual("sala1");
 
-        // Esperar un momento antes de conectar
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+
+
+            // Font para mensajes
+            font = new BitmapFont();
+            font.getData().setScale(2f);
+            font.setColor(Color.WHITE);
+
+            // Conectar al servidor
+            clientThread = new ClientThread(this);
+            clientThread.start();
+
+
+            clientThread.sendMessage("Connect");
+            System.out.println("📡 Conectando al servidor...");
+
+            habilidadesCliente = new HashMap<>();
+
+
+            yaInicializado = true;
+
+        } else {
+            actualizarCamara();
+        }
+        if (inputProcessor != null) {
+            Gdx.input.setInputProcessor(inputProcessor);
         }
 
-        clientThread.sendMessage("Connect");
-        System.out.println("📡 Conectando al servidor...");
     }
 
     @Override
@@ -144,6 +166,7 @@ public class PantallaJuego extends Pantalla implements GameController {
         }
 
 
+
         // 🎨 RENDERIZAR
         salaActual.getRenderer().setView(camara);
         salaActual.getRenderer().render();
@@ -164,9 +187,10 @@ public class PantallaJuego extends Pantalla implements GameController {
             for (Enemigo enemigo : enemigos) {
                 enemigo.update(delta);
                 enemigo.renderizar(batch);
-
+               // enemigo.actualizar(delta, this.jugadorLocal.getPosicion(), salaActual.getColisiones(), enemigos);
             }
         }
+
 
         // Dibujar boss
         Boss boss = salaActual.getBoss();
@@ -179,12 +203,17 @@ public class PantallaJuego extends Pantalla implements GameController {
             jugador.dibujar(batch);
         }
 
-        batch.end();
-
         // Dibujar HUD
         if (hud != null) {
             hud.draw(batch);
         }
+
+
+        batch.end();
+
+
+
+
 
 
 
@@ -215,9 +244,29 @@ public class PantallaJuego extends Pantalla implements GameController {
             batch.end();
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            juego.setScreen(new PantallaPausa(juego, batch, this));
+
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.TAB) && conectado && juegoIniciado ) {
+            inputProcessor.enviarEstado(false, false, false, false);
+            InputProcessor inputActual = Gdx.input.getInputProcessor();
+            Gdx.input.setInputProcessor(null);
+
+            PantallaArbolHabilidades arbolHabilidades = new PantallaArbolHabilidades(juego, batch, this, jugadorLocal, jugadorLocal.getHabilidades());
+            arbolHabilidades.setInputAnterior(inputActual);
+            juego.setScreen(arbolHabilidades);
         }
+
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && conectado && juegoIniciado) {
+            inputProcessor.enviarEstado(false, false, false, false);
+            InputProcessor inputActual = Gdx.input.getInputProcessor();
+            Gdx.input.setInputProcessor(null);
+
+            PantallaPausa pausa = new PantallaPausa(juego, batch, this);
+            pausa.setInputAnterior(inputActual);
+            juego.setScreen(pausa);
+        }
+
     }
 
     private void cambiarSala(String destinoId) {
@@ -259,6 +308,8 @@ public class PantallaJuego extends Pantalla implements GameController {
         salaActual.getRenderer().setView(camara);
 
         System.out.println("🚪 Cliente cambió a sala " + destinoId);
+
+
     }
 
 
@@ -314,15 +365,19 @@ public class PantallaJuego extends Pantalla implements GameController {
             jugadorLocal = new Jugador(miNumeroJugador, 10f, 10f);
             jugadores.put(miNumeroJugador, jugadorLocal);
 
+
             int otroJugador = (miNumeroJugador == 1) ? 2 : 1;
             jugadores.put(otroJugador, new Jugador(otroJugador, 12f, 10f));
 
             hud = new Hud(jugadorLocal, viewport);
             cambiarSala("sala1");
-            ManejoEntradas manejoEntradas = new ManejoEntradas(jugadorLocal, clientThread);
+            inputProcessor = new ManejoEntradas(jugadorLocal, clientThread);
 
 
-            Gdx.input.setInputProcessor(manejoEntradas);
+            hud.actualizarVida(vidaLocal, vidaMaximaLocal);
+            hud.actualizarMonedas(jugadorLocal.getMonedas());
+
+            Gdx.input.setInputProcessor(inputProcessor);
         });
     }
 
@@ -416,8 +471,13 @@ public class PantallaJuego extends Pantalla implements GameController {
     @Override
     public void updateCoins(int numPlayer, int coins) {
         if (numPlayer == miNumeroJugador) {
-            monedasLocal = coins;
+            jugadorLocal.setMonedas(coins);
             System.out.println("💰 Monedas actualizadas: " + coins);
+
+            // ✅ ACTUALIZAR HUD SI ESTÁ INICIALIZADO
+            if (hud != null) {
+                hud.actualizarMonedas(coins);
+            }
         }
     }
 
@@ -426,6 +486,11 @@ public class PantallaJuego extends Pantalla implements GameController {
         if (numPlayer == miNumeroJugador) {
             vidaLocal = health;
             System.out.println("❤️ Vida actualizada: " + health);
+
+            // ✅ ACTUALIZAR HUD SI ESTÁ INICIALIZADO
+            if (hud != null) {
+                hud.actualizarVida(health, vidaMaximaLocal);
+            }
         }
     }
 
@@ -451,9 +516,9 @@ public class PantallaJuego extends Pantalla implements GameController {
         Gdx.app.postRunnable(new Runnable() {
             @Override
             public void run() {
+                salaDestinoId = finalRoomId;
                 enTransicion = true;
                 faseSubida = true;
-                salaDestinoId = finalRoomId;
                 fadeAlpha = 0f;
             }
         });
@@ -545,9 +610,96 @@ public class PantallaJuego extends Pantalla implements GameController {
     }
 
     @Override
+    public void mostrarArbolHabilidades(String datosHabilidades) {
+        // Parsear datos: "Vida Extra,0;Fuerza,1;Velocidad,0;..."
+        habilidadesCliente.clear();
+
+        String[] habilidadesArray = datosHabilidades.split(";");
+        for (String hab : habilidadesArray) {
+            String[] partes = hab.split(",");
+            if (partes.length < 2) continue;
+
+            String nombre = partes[0];
+            boolean comprada = partes[1].equals("1");
+
+            // Crear instancia de habilidad
+            Habilidad habilidad = crearHabilidad(nombre);
+            if (habilidad != null) {
+                habilidad.comprada = comprada;
+                habilidadesCliente.put(nombre, habilidad);
+            }
+        }
+
+        // Abrir pantalla de árbol de habilidades
+        pantallaHabilidades = new PantallaArbolHabilidades(
+            juego, batch, this, jugadorLocal, habilidadesCliente
+        );
+        juego.setScreen(pantallaHabilidades);
+    }
+
+    @Override
+    public void actualizarHabilidades(String datosHabilidades, int monedas) {
+        // Actualizar monedas locales
+        jugadorLocal.setMonedas(monedas);
+
+        if (hud != null) {
+            hud.actualizarMonedas(monedas);
+        }
+
+        // Parsear y actualizar estado de habilidades
+        String[] habilidadesArray = datosHabilidades.split(";");
+        for (String hab : habilidadesArray) {
+            String[] partes = hab.split(",");
+            if (partes.length < 2) continue;
+
+            String nombre = partes[0];
+            boolean comprada = partes[1].equals("1");
+
+            Habilidad habilidad = habilidadesCliente.get(nombre);
+            if (habilidad != null) {
+                habilidad.comprada = comprada;
+            }
+        }
+
+        // Si la pantalla de habilidades está activa, notificarla
+        if (pantallaHabilidades != null) {
+            pantallaHabilidades.actualizarDatos();
+        }
+    }
+
+    @Override
+    public void mostrarMensajeCompraFallida(String nombreHabilidad) {
+        System.out.println("❌ No se pudo comprar: " + nombreHabilidad);
+        // Si la pantalla está activa, mostrar mensaje
+        if (pantallaHabilidades != null) {
+            pantallaHabilidades.mostrarMensaje("No se pudo comprar " + nombreHabilidad);
+        }
+    }
+
+
+    private Habilidad crearHabilidad(String nombre) {
+        switch (nombre) {
+            case "Vida Extra": return new HabilidadVida();
+            case "Fuerza": return new HabilidadFuerza();
+            case "Velocidad": return new HabilidadVelocidad();
+            case "Defensa": return new HabilidadDefensa();
+            case "Ataque Veloz": return new HabilidadAtaqueVeloz();
+            case "Velocidad II": return new HabilidadVelocidad2();
+            case "Regeneración": return new HabilidadRegeneracion();
+            case "Golpe Crítico": return new HabilidadGolpeCritico();
+            case "Evasión": return new HabilidadEvasion();
+            default: return null;
+        }
+    }
+
+    @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
         actualizarCamara();
+    }
+
+    public void cerrarPantallaHabilidades() {
+        this.pantallaHabilidades = null;
     }
 
     @Override
@@ -567,9 +719,6 @@ public class PantallaJuego extends Pantalla implements GameController {
         if (texturaFade != null) {
             texturaFade.dispose();
         }
-        if (font != null) {
-            font.dispose();
-        }
         System.out.println("🔴 Cliente desconectado");
     }
 
@@ -579,5 +728,13 @@ public class PantallaJuego extends Pantalla implements GameController {
 
     public Mapa getMapaActual() {
         return this.mapaActual;
+    }
+
+    public ClientThread getClientThread() {
+        return clientThread;
+    }
+
+    public void setInputProcessor(InputProcessor inputAnterior) {
+        Gdx.input.setInputProcessor(inputAnterior);
     }
 }

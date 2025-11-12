@@ -52,7 +52,7 @@ public class Hud {
         com.badlogic.gdx.math.Matrix4 originalProjection = batch.getProjectionMatrix().cpy();
         batch.setProjectionMatrix(new com.badlogic.gdx.math.Matrix4().setToOrtho2D(0, 0, viewport.getScreenWidth(), viewport.getScreenHeight()));
 
-        batch.begin();
+
 
         float screenWidth = viewport.getScreenWidth();
         float screenHeight = viewport.getScreenHeight();
@@ -100,20 +100,18 @@ public class Hud {
         font.setColor(com.badlogic.gdx.graphics.Color.YELLOW);
         font.draw(batch, textoMonedas, textoX, textoY);
 
-        batch.end();
+
         batch.setProjectionMatrix(originalProjection);
     }
 
-    /**
-     * Actualiza la vida mostrada (recibida del servidor)
-     */
+
     public void actualizarVida(int vida, int vidaMaxima) {
         this.vidaActual = vida;
         this.vidaMaxima = vidaMaxima;
     }
 
     /**
-     * Actualiza las monedas mostradas (recibidas del servidor)
+     * ✅ Actualiza las monedas mostradas (recibidas del servidor)
      */
     public void actualizarMonedas(int monedas) {
         this.monedasActual = monedas;

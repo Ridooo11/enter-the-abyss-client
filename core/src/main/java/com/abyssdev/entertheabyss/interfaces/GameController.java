@@ -18,4 +18,8 @@ public interface GameController {
     void backToMenu();
     void syncEnemies(String enemiesData);
     void spawnEnemy(int id, float x, float y);
+
+    void mostrarArbolHabilidades(String datosHabilidades);
+    void actualizarHabilidades(String datosHabilidades, int monedas);
+    void mostrarMensajeCompraFallida(String nombreHabilidad);
 }

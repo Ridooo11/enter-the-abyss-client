@@ -5,6 +5,7 @@ import com.abyssdev.entertheabyss.mapas.Sala;
 import com.abyssdev.entertheabyss.mapas.ZonaTransicion;
 import com.abyssdev.entertheabyss.pantallas.PantallaJuego;
 import com.abyssdev.entertheabyss.personajes.Enemigo;
+import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 
@@ -157,6 +158,42 @@ public class ClientThread extends Thread {
                 if (parts.length >= 2) {
                     String roomId = parts[1];
                     gameController.updateRoomChange(roomId);
+                }
+                break;
+
+            case "Habilidades":
+                // Habilidades:Vida Extra,0;Fuerza,1;...
+                if (parts.length >= 2) {
+                    String datosHabilidades = parts[1];
+                    Gdx.app.postRunnable(() -> {
+                        gameController.mostrarArbolHabilidades(datosHabilidades);
+                    });
+                }
+                break;
+
+            case "CompraExitosa":
+                // CompraExitosa:nombreHabilidad:datosActualizados:monedas
+                if (parts.length >= 4) {
+                    String nombreHabilidad = parts[1];
+                    String datosHabilidades = parts[2];
+                    int monedas = Integer.parseInt(parts[3]);
+
+                    Gdx.app.postRunnable(() -> {
+                        gameController.actualizarHabilidades(datosHabilidades, monedas);
+                        // Reproducir sonido de compra exitosa
+                        Sonidos.reproducirCompraExitosa();
+                    });
+                }
+                break;
+
+            case "CompraFallida":
+                // CompraFallida:nombreHabilidad
+                if (parts.length >= 2) {
+                    String nombreHabilidad = parts[1];
+                    Gdx.app.postRunnable(() -> {
+                        gameController.mostrarMensajeCompraFallida(nombreHabilidad);
+                        Sonidos.reproducirCompraFallida();
+                    });
                 }
                 break;
 

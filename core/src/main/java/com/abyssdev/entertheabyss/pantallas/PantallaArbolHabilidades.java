@@ -2,12 +2,14 @@ package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.abyssdev.entertheabyss.habilidades.*;
+import com.abyssdev.entertheabyss.network.ClientThread;
 import com.abyssdev.entertheabyss.personajes.Jugador;
 import com.abyssdev.entertheabyss.ui.FontManager;
 import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -47,17 +49,21 @@ public class PantallaArbolHabilidades extends Pantalla {
     private Viewport viewport;
     private OrthographicCamera camara;
 
+
+
     private final String[][] NODOS = {
         {"Vida Extra"  , "Fuerza"       , "Velocidad"   },
         {"Defensa"     , "Ataque Veloz" , "Velocidad II"},
         {"Regeneración", "Golpe Crítico", "Evasión"     }
     };
+    private InputProcessor inputAnterior;
 
     public PantallaArbolHabilidades(Game juego, SpriteBatch batch, PantallaJuego pantallaJuego, Jugador jugador, Map<String, Habilidad> habilidades) {
         super(juego, batch);
         this.pantallaJuego = pantallaJuego;
         this.jugador = jugador;
         this.habilidades = habilidades;
+
     }
 
     @Override
@@ -386,7 +392,7 @@ public class PantallaArbolHabilidades extends Pantalla {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
-
+            if (inputAnterior != null) pantallaJuego.setInputProcessor(inputAnterior);
             juego.setScreen(pantallaJuego);
             Sonidos.reanudarMusicaJuego();
         }
@@ -394,13 +400,12 @@ public class PantallaArbolHabilidades extends Pantalla {
 
     private void intentarCompra(Habilidad habilidad) {
         if (habilidad.comprada) {
-
             mostrarMensaje("Ya has comprado esta habilidad.");
             Sonidos.reproducirCompraFallida();
             return;
         }
 
-        // Buscar la posición de la habilidad en la matriz NODOS
+        // Verificar dependencias localmente
         int fila = -1, columna = -1;
         for (int f = 0; f < NODOS.length; f++) {
             for (int c = 0; c < NODOS[f].length; c++) {
@@ -412,40 +417,40 @@ public class PantallaArbolHabilidades extends Pantalla {
             }
         }
 
-        // Si la habilidad no está en la matriz, no seguimos
         if (fila == -1 || columna == -1) {
-            mostrarMensaje("Error: habilidad no encontrada en el árbol.");
+            mostrarMensaje("Error: habilidad no encontrada.");
             return;
         }
 
-        // Verificar si tiene una habilidad superior (fila anterior)
         if (fila > 0) {
             String idSuperior = NODOS[fila - 1][columna];
-            Habilidad habilidadSuperior = habilidades.get(idSuperior);
-            if (habilidadSuperior != null && !habilidadSuperior.comprada) {
-                mostrarMensaje("Primero debes comprar " + habilidadSuperior.getNombre() + ".");
+            Habilidad superior = habilidades.get(idSuperior);
+            if (superior != null && !superior.comprada) {
+                mostrarMensaje("Primero debes comprar " + superior.getNombre());
                 Sonidos.reproducirCompraFallida();
                 return;
             }
         }
 
-        // Verificar monedas
-       /* if (jugador.getMonedas() < habilidad.getCosto()) {
+        if (jugador.getMonedas() < habilidad.getCosto()) {
             mostrarMensaje("Monedas insuficientes.");
             Sonidos.reproducirCompraFallida();
             return;
-        }*/
+        }
 
-        // Compra válida
-       // jugador.modificarMonedas(-habilidad.getCosto());
-        habilidad.comprada = true;
-        habilidad.aplicar(jugador);
-        mostrarMensaje("¡Compra exitosa! " + habilidad.getNombre() + " mejorada.");
+        // ✅ ENVIAR COMPRA AL SERVIDOR
+        pantallaJuego.getClientThread().sendMessage("ComprarHabilidad:" + habilidad.getNombre());
         Sonidos.reproducirCompraExitosa();
+        mostrarMensaje("Procesando compra...");
     }
 
+    // ✅ AGREGAR MÉTODO PÚBLICO PARA ACTUALIZAR
+    public void actualizarDatos() {
+        // Refrescar la pantalla con los nuevos datos
+        mostrarMensaje("¡Compra exitosa!");
+    }
 
-    private void mostrarMensaje(String msg) {
+    void mostrarMensaje(String msg) {
         mensaje = msg;
         tiempoMensaje = 3.0f; // Aumentado a 3 segundos (antes 2f)
         Gdx.app.log("ÁrbolHabilidades", msg);
@@ -456,6 +461,10 @@ public class PantallaArbolHabilidades extends Pantalla {
         viewport.update(width, height);
         camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
         camara.update();
+    }
+
+    public void setInputAnterior(InputProcessor inputActual) {
+        this.inputAnterior = inputAnterior;
     }
 
     @Override

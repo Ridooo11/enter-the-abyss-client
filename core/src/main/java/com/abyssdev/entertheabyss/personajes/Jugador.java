@@ -1,7 +1,9 @@
 package com.abyssdev.entertheabyss.personajes;
 
+import com.abyssdev.entertheabyss.habilidades.*;
 import com.abyssdev.entertheabyss.personajes.Accion;
 import com.abyssdev.entertheabyss.personajes.Direccion;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -9,6 +11,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Versión CLIENTE del Jugador
@@ -18,6 +23,7 @@ import com.badlogic.gdx.math.Vector2;
 public class Jugador {
     // Identificación
     private int numeroJugador;
+    private int monedas;
 
     // Solo para renderizado
     private Vector2 posicion;
@@ -45,6 +51,22 @@ public class Jugador {
     private boolean mostrarFrame = true;
     private Rectangle hitbox;
 
+    private boolean regeneracionActiva = false;
+    private float tiempoRegeneracion = 0f;
+    private float intervaloRegeneracion = 1f; // Cada 1 segundo
+    private int cantidadRegeneracion = 1;
+
+    // --- DASH / EVASIÓN ---
+    private boolean evasionHabilitada = false;
+    private boolean estaEvadendo = false;
+    private float duracionEvasion = 0.3f; // dura 0.3 segundos
+    private float tiempoEvasion = 0f;
+    private float cooldownEvasion = 1.5f; // tiempo antes de poder volver a usar
+    private float tiempoDesdeUltimaEvasion = 0f;
+    private float velocidadBase = 3.2f;
+
+    private Map<String, Habilidad> habilidades;
+
     public Jugador(int numeroJugador, float x, float y) {
         this.numeroJugador = numeroJugador;
         this.posicion = new Vector2(x, y);
@@ -53,10 +75,27 @@ public class Jugador {
         hojaSprite = new Texture("personajes/player.png");
         inicializarMapaFilas();
         cargarAnimaciones();
+
+        inicializarHabilidades();
     }
 
+    private void inicializarHabilidades() {
 
+            habilidades = new HashMap<>();
+            habilidades.put("Vida Extra", new HabilidadVida());
+            habilidades.put("Fuerza", new HabilidadFuerza());
+            habilidades.put("Velocidad", new HabilidadVelocidad());
+            habilidades.put("Defensa", new HabilidadDefensa());
+            habilidades.put("Ataque Veloz", new HabilidadAtaqueVeloz());
+            habilidades.put("Velocidad II", new HabilidadVelocidad2());
+            habilidades.put("Regeneración", new HabilidadRegeneracion());
+            habilidades.put("Golpe Crítico", new HabilidadGolpeCritico());
+            habilidades.put("Evasión", new HabilidadEvasion());
+    }
 
+    public Map<String, Habilidad> getHabilidades() {
+        return habilidades;
+    }
 
     private void inicializarMapaFilas() {
         mapaFilasAnimacion = new int[Accion.values().length][Direccion.values().length];
@@ -224,5 +263,14 @@ public class Jugador {
     public Rectangle getHitbox() {
         hitbox.setPosition(posicion.x, posicion.y);
         return hitbox;
+    }
+
+
+    public int getMonedas() {
+        return this.monedas;
+    }
+
+    public void setMonedas(int monedas) {
+        this.monedas = monedas;
     }
 }

@@ -55,6 +55,11 @@ public class ManejoEntradas implements InputProcessor {
         clientThread.sendMessage(mensaje);
     }
 
+    public void enviarEstado(boolean arriba, boolean abajo, boolean izquierda, boolean derecha) {
+        String mensaje = "Input:" + arriba + ":" + abajo + ":" + izquierda + ":" + derecha;
+        clientThread.sendMessage(mensaje);
+    }
+
     // Métodos no usados
     @Override public boolean keyTyped(char character) { return false; }
     @Override public boolean touchDown(int screenX, int screenY, int pointer, int button) { return false; }
