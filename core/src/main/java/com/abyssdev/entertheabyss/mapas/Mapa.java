@@ -19,7 +19,7 @@ public class Mapa {
     }
 
     public void establecerSalaActual(String salaId) {
-        if (salaActual != null) return;
+
         salaActual = salas.get(salaId);
     }
 

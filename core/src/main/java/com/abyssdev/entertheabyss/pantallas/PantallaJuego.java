@@ -111,7 +111,7 @@ public class PantallaJuego extends Pantalla implements GameController {
             mapaActual.agregarSala(new Sala("sala3", "maps/mapa1_sala5.tmx"));
             mapaActual.agregarSala(new Sala("sala5", "maps/mapa2_posible.tmx"));
             salaActual = mapaActual.getSala("sala1");
-            mapaActual.establecerSalaActual("sala1");
+
 
 
 
@@ -276,8 +276,12 @@ public class PantallaJuego extends Pantalla implements GameController {
             return;
         }
 
+        System.out.println("🔄 Ejecutando cambio físico a sala " + destinoId);
+
         salaActual = salaDestino;
         mapaActual.establecerSalaActual(destinoId);
+
+
 
         // 🔹 Buscar spawn correspondiente
         SpawnPoint spawn = null;
@@ -307,9 +311,7 @@ public class PantallaJuego extends Pantalla implements GameController {
         camara.update();
         salaActual.getRenderer().setView(camara);
 
-        System.out.println("🚪 Cliente cambió a sala " + destinoId);
-
-
+        System.out.println("✅ Sala cambiada a " + destinoId + ". Esperando enemigos...");
     }
 
 
@@ -509,18 +511,24 @@ public class PantallaJuego extends Pantalla implements GameController {
 
     @Override
     public void updateRoomChange(String roomId) {
-        System.out.println("🚪 Cambiando a sala: " + roomId);
-        mapaActual.establecerSalaActual(roomId);
+        System.out.println("🚪 Recibido cambio de sala: " + roomId);
 
         final String finalRoomId = roomId;
-        Gdx.app.postRunnable(new Runnable() {
-            @Override
-            public void run() {
-                salaDestinoId = finalRoomId;
-                enTransicion = true;
-                faseSubida = true;
-                fadeAlpha = 0f;
+        Gdx.app.postRunnable(() -> {
+            // 🔹 PRIMERO: Limpiar enemigos de la sala actual
+            if (salaActual != null && salaActual.getEnemigos() != null) {
+                int cantidadEliminada = salaActual.getEnemigos().size();
+                salaActual.getEnemigos().clear();
+                System.out.println("🧹 Limpiados " + cantidadEliminada + " enemigos de sala " + salaActual.getId());
             }
+
+            // 🔹 SEGUNDO: Cambiar sala
+            salaDestinoId = finalRoomId;
+            enTransicion = true;
+            faseSubida = true;
+            fadeAlpha = 0f;
+
+            System.out.println("🎬 Iniciando transición a sala " + finalRoomId);
         });
     }
 
@@ -589,24 +597,36 @@ public class PantallaJuego extends Pantalla implements GameController {
 
     @Override
     public void spawnEnemy(int id, float x, float y) {
-        if (salaActual == null) return;
+        Gdx.app.postRunnable(() -> {
+            if (salaActual == null) {
+                System.err.println("⚠️ No hay sala actual para spawn enemigo " + id);
+                return;
+            }
 
-        // asegurate de que la lista exista
-        if (salaActual.getEnemigos() == null) {
-            salaActual.setEnemigos(new ArrayList<>());
-        }
+            // 🔹 VERIFICAR QUE LA SALA TENGA ENEMIGOS INICIALIZADOS
+            if (salaActual.getEnemigos() == null) {
+                System.out.println("📋 Inicializando lista de enemigos en sala " + salaActual.getId());
+                salaActual.setEnemigos(new ArrayList<>());
+            }
 
-        // prevenir duplicados
-        ArrayList<Enemigo> enemigos = salaActual.getEnemigos();
-        while (enemigos.size() <= id) {
-            enemigos.add(null);
-        }
+            ArrayList<Enemigo> enemigos = salaActual.getEnemigos();
 
-        if (enemigos.get(id) == null) {
-            Enemigo enemigo = new Enemigo(x, y, 1f, 2f, 5);
-            enemigos.set(id, enemigo);
-            System.out.println("👾 Enemigo " + id + " creado en cliente en (" + x + ", " + y + ")");
-        }
+            // Expandir lista si es necesario
+            while (enemigos.size() <= id) {
+                enemigos.add(null);
+            }
+
+            // Solo crear si no existe
+            if (enemigos.get(id) == null) {
+                Enemigo enemigo = new Enemigo(x, y, 1f, 2f, 5);
+                enemigos.set(id, enemigo);
+                System.out.println("✅ Enemigo " + id + " spawneado en sala " + salaActual.getId() + " en (" + x + ", " + y + ")");
+            } else {
+                System.out.println("⚠️ Enemigo " + id + " ya existe, actualizando posición");
+                enemigos.get(id).setX(x);
+                enemigos.get(id).setY(y);
+            }
+        });
     }
 
     @Override
