@@ -195,6 +195,7 @@ public class PantallaJuego extends Pantalla implements GameController {
         // Dibujar boss
         Boss boss = salaActual.getBoss();
         if (boss != null) {
+            boss.update(delta);
             boss.renderizar(batch);
         }
 
@@ -521,6 +522,7 @@ public class PantallaJuego extends Pantalla implements GameController {
                 System.out.println("🧹 Limpiados " + cantidadEliminada + " enemigos de sala " + salaActual.getId());
             }
 
+            cambiarSala(finalRoomId);
 
             salaDestinoId = finalRoomId;
             enTransicion = true;
@@ -692,6 +694,38 @@ public class PantallaJuego extends Pantalla implements GameController {
         // Si la pantalla está activa, mostrar mensaje
         if (pantallaHabilidades != null) {
             pantallaHabilidades.mostrarMensaje("No se pudo comprar " + nombreHabilidad);
+        }
+    }
+
+    @Override
+    public void spawnBoss(float x, float y) {
+        System.out.println("👑 Spawneando Boss en (" + x + ", " + y + ")");
+
+        Boss boss = new Boss(x, y, 1.5f, 4f, 30);
+        salaActual.setBoss(boss);
+
+        System.out.println("✅ Boss spawneado correctamente");
+    }
+
+    @Override
+    public void updateBossPosition(float x, float y) {
+        Boss boss = salaActual.getBoss();
+        if (boss != null) {
+            boss.setX(x);
+            boss.setY(y);
+        }
+    }
+
+    @Override
+    public void updateBossAnimation(String action, String direction) {
+        Boss boss = salaActual.getBoss();
+        if (boss != null) {
+            boss.actualizarDesdeServidor(
+                boss.getPosicion().x,
+                boss.getPosicion().y,
+                action,
+                direction
+            );
         }
     }
 

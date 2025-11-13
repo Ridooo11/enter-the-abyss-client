@@ -105,6 +105,9 @@ public class ClientThread extends Thread {
                     } else if (tipo.equalsIgnoreCase("Enemigo")) {
                         gameController.updateEnemyPosition(id, x, y);
                         gameController.updateEnemyAnimation(id, action, direction);
+                    } else if (tipo.equalsIgnoreCase("Boss")) {
+                        gameController.updateBossPosition(x, y);
+                        gameController.updateBossAnimation(action, direction);
                     }
                 }
                 break;
@@ -122,6 +125,17 @@ public class ClientThread extends Thread {
                 }
                 break;
 
+            case "SpawnBoss":
+                // SpawnBoss:x:y
+                if (parts.length >= 3) {
+                    float x = Float.parseFloat(parts[1]);
+                    float y = Float.parseFloat(parts[2]);
+
+                    Gdx.app.postRunnable(() -> {
+                        gameController.spawnBoss(x, y);
+                    });
+                }
+                break;
 
             case "EnemyDead":
                 // EnemyDead:enemyId

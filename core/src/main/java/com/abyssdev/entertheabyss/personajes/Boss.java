@@ -38,6 +38,8 @@ public class Boss extends Enemigo {
         batch.draw(frame, drawX, drawY, width, height);
     }
 
+
+
     private TextureRegion obtenerFrameActual() {
         switch (estado) {
             case CAMINAR:

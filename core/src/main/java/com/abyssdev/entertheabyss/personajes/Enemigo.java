@@ -239,32 +239,56 @@ public class Enemigo {
         // Actualizar posición directamente
         this.posicion.set(x, y);
 
-        // Actualizar dirección (para invertir el sprite si hace falta)
+        // Actualizar dirección
         if (direction != null) {
             this.haciaIzquierda = direction.equalsIgnoreCase("IZQUIERDA");
         }
 
-        // Determinar el estado según el string recibido
-        switch (action.toUpperCase()) {
-            case "CAMINAR":
-                cambiarEstado(Accion.CAMINAR);
-                break;
-            case "ATAQUE":
-                cambiarEstado(Accion.ATAQUE);
-                break;
-            case "HIT":
-                cambiarEstado(Accion.HIT);
-                break;
-            case "MUERTE":
-                cambiarEstado(Accion.MUERTE);
-                break;
-            default:
-                cambiarEstado(Accion.ESTATICO);
-                break;
+        // Convertir string a enum
+        Accion nuevoEstado;
+        try {
+            nuevoEstado = Accion.valueOf(action.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            nuevoEstado = Accion.ESTATICO;
         }
 
-        // Reiniciar el tiempo de animación si cambió el estado
-        this.tiempoEstado = 0f;
+        // ✅ LÓGICA DE PRIORIDAD DE ANIMACIONES
+
+        // Si está en MUERTE, ignorar cualquier otro estado
+        if (this.estado == Accion.MUERTE) {
+            return;
+        }
+
+        // Si está en HIT, solo permitir cambiar a MUERTE
+        if (this.estado == Accion.HIT) {
+            if (nuevoEstado == Accion.MUERTE) {
+                cambiarEstado(nuevoEstado);
+            }
+            // Si la animación de HIT terminó, volver a ESTATICO
+            else if (animHit.isAnimationFinished(tiempoEstado)) {
+                cambiarEstado(Accion.ESTATICO);
+            }
+            // Ignorar cualquier otro cambio mientras HIT está activo
+            return;
+        }
+
+        // Si está en ATAQUE, solo permitir cambiar a HIT o MUERTE
+        if (this.estado == Accion.ATAQUE) {
+            if (nuevoEstado == Accion.HIT || nuevoEstado == Accion.MUERTE) {
+                cambiarEstado(nuevoEstado);
+            }
+            // Si la animación de ATAQUE terminó, volver a ESTATICO
+            else if (animAtacar.isAnimationFinished(tiempoEstado)) {
+                cambiarEstado(Accion.ESTATICO);
+            }
+            // Ignorar cualquier otro cambio mientras ATAQUE está activo
+            return;
+        }
+
+        // Para ESTATICO y CAMINAR, permitir cualquier cambio
+        if (this.estado != nuevoEstado) {
+            cambiarEstado(nuevoEstado);
+        }
     }
 
 
@@ -299,5 +323,22 @@ public class Enemigo {
 
     public void update(float delta) {
         tiempoEstado += delta;
+
+        // ✅ Transiciones automáticas cuando las animaciones terminan
+
+        // Si está muriendo y la animación terminó, marcar para eliminar
+        if (estado == Accion.MUERTE && animMuerte.isAnimationFinished(tiempoEstado)) {
+            eliminar = true;
+        }
+
+        // Si está en HIT y la animación terminó, volver a ESTATICO
+        if (estado == Accion.HIT && animHit.isAnimationFinished(tiempoEstado)) {
+            cambiarEstado(Accion.ESTATICO);
+        }
+
+        // Si está atacando y la animación terminó, volver a ESTATICO
+        if (estado == Accion.ATAQUE && animAtacar.isAnimationFinished(tiempoEstado)) {
+            cambiarEstado(Accion.ESTATICO);
+        }
     }
 }

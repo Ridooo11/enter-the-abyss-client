@@ -22,4 +22,8 @@ public interface GameController {
     void mostrarArbolHabilidades(String datosHabilidades);
     void actualizarHabilidades(String datosHabilidades, int monedas);
     void mostrarMensajeCompraFallida(String nombreHabilidad);
+
+    void spawnBoss(float x, float y);
+    void updateBossPosition(float x, float y);
+    void updateBossAnimation(String action, String direction);
 }
