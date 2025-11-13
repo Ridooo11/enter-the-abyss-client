@@ -276,6 +276,7 @@ public class Sala {
         }
     }
 
+
     public boolean hayEnemigosVivos() {
         if (this.enemigos == null) return false;
         for (Enemigo e : this.enemigos) {
@@ -346,6 +347,7 @@ public class Sala {
     public Boss getBoss() { return this.bossFinal; }
     public void setBoss(Boss boss) { this.bossFinal = boss; }
     public boolean getBossGenerado() { return this.bossGenerado; }
+
 
     public void setEnemigos(ArrayList<Enemigo> enemigos) {
         this.enemigos = enemigos;

@@ -224,7 +224,6 @@ public class PantallaJuego extends Pantalla implements GameController {
                 fadeAlpha += fadeSpeed * delta;
                 if (fadeAlpha >= 1f) {
                     fadeAlpha = 1f;
-                    cambiarSala(salaDestinoId);
                     faseSubida = false;
                 }
             } else {
@@ -372,7 +371,7 @@ public class PantallaJuego extends Pantalla implements GameController {
             jugadores.put(otroJugador, new Jugador(otroJugador, 12f, 10f));
 
             hud = new Hud(jugadorLocal, viewport);
-            cambiarSala("sala1");
+            cambiarSala(salaActual.getId());
             inputProcessor = new ManejoEntradas(jugadorLocal, clientThread);
 
 
@@ -522,7 +521,7 @@ public class PantallaJuego extends Pantalla implements GameController {
                 System.out.println("🧹 Limpiados " + cantidadEliminada + " enemigos de sala " + salaActual.getId());
             }
 
-            // 🔹 SEGUNDO: Cambiar sala
+
             salaDestinoId = finalRoomId;
             enTransicion = true;
             faseSubida = true;
