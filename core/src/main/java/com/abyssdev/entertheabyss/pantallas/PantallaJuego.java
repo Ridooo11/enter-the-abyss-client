@@ -10,6 +10,7 @@ import com.abyssdev.entertheabyss.personajes.*;
 import com.abyssdev.entertheabyss.pantallas.MenuInicio;
 import com.abyssdev.entertheabyss.pantallas.Pantalla;
 import com.abyssdev.entertheabyss.ui.Hud;
+import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -729,6 +730,30 @@ public class PantallaJuego extends Pantalla implements GameController {
         }
     }
 
+    @Override
+    public void playerDied(int numPlayer) {
+        System.out.println("💀 Jugador " + numPlayer + " ha muerto");
+
+        Jugador jugador = jugadores.get(numPlayer);
+        if (jugador != null) {
+            jugador.setAccionActual(Accion.MUERTE);
+        }
+
+    }
+
+    @Override
+    public void showGameOver() {
+        System.out.println("🎮 Mostrando pantalla Game Over");
+
+        Gdx.app.postRunnable(() -> {
+            // Detener música del juego
+            Sonidos.detenerTodaMusica();
+
+            // Cambiar a pantalla Game Over
+            juego.setScreen(new PantallaGameOver(juego, batch));
+        });
+    }
+
 
     private Habilidad crearHabilidad(String nombre) {
         switch (nombre) {
@@ -757,7 +782,8 @@ public class PantallaJuego extends Pantalla implements GameController {
 
     @Override
     public void dispose() {
-        if (clientThread != null) {
+        if (clientThread != null && !clientThread.isInterrupted()) {
+            clientThread.sendMessage("Disconnect");
             clientThread.terminate();
         }
         if (mapaActual != null) {

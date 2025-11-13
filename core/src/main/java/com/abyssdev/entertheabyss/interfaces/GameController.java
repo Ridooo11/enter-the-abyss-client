@@ -26,4 +26,7 @@ public interface GameController {
     void spawnBoss(float x, float y);
     void updateBossPosition(float x, float y);
     void updateBossAnimation(String action, String direction);
+
+    void playerDied(int numPlayer);
+    void showGameOver();
 }

@@ -257,6 +257,22 @@ public class ClientThread extends Thread {
                 }
                 break;
 
+            case "PlayerDied":
+                // PlayerDied:numPlayer
+                if (parts.length >= 2) {
+                    int playerNum = Integer.parseInt(parts[1]);
+                    Gdx.app.postRunnable(() -> {
+                        gameController.playerDied(playerNum);
+                    });
+                }
+                break;
+
+            case "GameOver":
+                Gdx.app.postRunnable(() -> {
+                    gameController.showGameOver();
+                });
+                break;
+
             default:
                 System.out.println("⚠️ Mensaje desconocido: " + parts[0]);
                 break;

@@ -1,11 +1,11 @@
+// Modificar PantallaGameOver.java:
+
 package com.abyssdev.entertheabyss.pantallas;
 
-import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.abyssdev.entertheabyss.ui.FontManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -18,7 +18,6 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.abyssdev.entertheabyss.ui.Sonidos;
 
 public class PantallaGameOver extends Pantalla {
-
 
     private BitmapFont font;
     private Texture fondoPausa;
@@ -34,8 +33,8 @@ public class PantallaGameOver extends Pantalla {
     private Viewport viewport;
     private OrthographicCamera camara;
 
-    public PantallaGameOver(Game juego,SpriteBatch batch) {
-        super(juego,batch);
+    public PantallaGameOver(Game juego, SpriteBatch batch) {
+        super(juego, batch);
     }
 
     @Override
@@ -76,15 +75,14 @@ public class PantallaGameOver extends Pantalla {
         batch.begin();
         batch.draw(fondoPausa, 0, 0, ancho, alto);
 
-        // ✅ Coordenadas fijas del marco (800x600)
-        float centerX = 400f; // 800 / 2
-        float centerY = 180f; // 600 / 2 - 80 (espacio arriba)
+        float centerX = 400f;
+        float centerY = 180f;
 
         for (int i = 0; i < opciones.length; i++) {
             String texto = opciones[i];
             layout.setText(font, texto);
             float x = centerX - layout.width / 2f;
-            float y = centerY + (opciones.length - 1 - i) * 60 - 20; // Ajuste manual
+            float y = centerY + (opciones.length - 1 - i) * 60 - 20;
 
             if (i == opcionSeleccionada && mostrarColor) {
                 font.setColor(Color.YELLOW);
@@ -116,22 +114,33 @@ public class PantallaGameOver extends Pantalla {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             switch (opcionSeleccionada) {
-                case 0:
-                    juego.setScreen(new MenuInicio(juego,batch));
+                case 0: // Volver al Menu
+                    Sonidos.detenerTodaMusica();
+                    Sonidos.reproducirMusicaMenu();
+
+                    // ✅ LLAMAR AL DISPOSE DE LA PANTALLA ANTERIOR PARA DESCONECTAR
+                    if (juego.getScreen() != null) {
+                        juego.getScreen().dispose();
+                    }
+
+                    juego.setScreen(new MenuInicio(juego, batch));
                     break;
+
                 case 1: // Salir
+                    // ✅ DESCONECTAR ANTES DE SALIR
+                    if (juego.getScreen() != null) {
+                        juego.getScreen().dispose();
+                    }
                     Gdx.app.exit();
                     break;
             }
         }
-
-
     }
 
     @Override
     public void dispose() {
-        fondoPausa.dispose();
-
-
+        if (fondoPausa != null) {
+            fondoPausa.dispose();
+        }
     }
 }
