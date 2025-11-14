@@ -23,7 +23,7 @@ import java.util.Map;
 public class Jugador {
     // Identificación
     private int numeroJugador;
-    private int monedas;
+    private int monedas = 0;
 
     // Solo para renderizado
     private Vector2 posicion;
