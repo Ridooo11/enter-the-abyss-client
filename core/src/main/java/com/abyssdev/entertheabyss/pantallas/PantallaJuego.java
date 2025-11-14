@@ -38,6 +38,11 @@ import java.util.Map;
  */
 public class PantallaJuego extends Pantalla implements GameController {
 
+    // 🛒 Tienda - AGREGAR ESTAS LÍNEAS
+    private boolean jugadorCercaDeOgrini = false;
+    private static final float DISTANCIA_INTERACCION = 2.0f;
+
+
     private OrthographicCamera camara;
     private Viewport viewport;
 
@@ -66,9 +71,9 @@ public class PantallaJuego extends Pantalla implements GameController {
     private boolean faseSubida = true;
     private String salaDestinoId = null;
 
-    //Tienda
-    private boolean jugadorCercaDeOgrini = false;
-    private final float DISTANCIA_INTERACCION = 1.5f;
+//    //Tienda
+//    private boolean jugadorCercaDeOgrini = false;
+//    private final float DISTANCIA_INTERACCION = 1.5f;
 
     // 📊 HUD
     private Hud hud;
@@ -205,9 +210,15 @@ public class PantallaJuego extends Pantalla implements GameController {
             jugador.dibujar(batch);
         }
 
+        // ✅ NUEVO: Verificar proximidad a Ogrini
+        if (jugadorLocal != null) {
+            verificarProximidadOgrini();
+        }
+
         // Dibujar HUD
         if (hud != null) {
             hud.draw(batch);
+            hud.dibujarIndicadorTienda(batch, jugadorCercaDeOgrini); // ✅ NUEVO
         }
 
 
@@ -267,6 +278,26 @@ public class PantallaJuego extends Pantalla implements GameController {
             pausa.setInputAnterior(inputActual);
             juego.setScreen(pausa);
         }
+        // ✅ NUEVO: Input para abrir tienda
+        if (Gdx.input.isKeyJustPressed(Input.Keys.T) &&
+            conectado &&
+            juegoIniciado &&
+            jugadorCercaDeOgrini) {
+
+            System.out.println("🛒 Abriendo tienda...");
+
+            // Detener inputs de movimiento
+            inputProcessor.enviarEstado(false, false, false, false);
+
+            // Guardar input actual y desactivar
+            InputProcessor inputActual = Gdx.input.getInputProcessor();
+            Gdx.input.setInputProcessor(null);
+
+            // Abrir tienda
+            PantallaTienda tienda = new PantallaTienda(juego, batch, jugadorLocal, this);
+            juego.setScreen(tienda);
+        }
+
 
     }
 
@@ -335,6 +366,37 @@ public class PantallaJuego extends Pantalla implements GameController {
 
         camara.position.set(x, y, 0);
         camara.update();
+    }
+
+    // ✅ NUEVO MÉTODO - Agregar después de actualizarCamara()
+    private void verificarProximidadOgrini() {
+        if (salaActual == null) return;
+
+        Rectangle zonaOgrini = salaActual.getZonaOgrini();
+        if (zonaOgrini == null) {
+            jugadorCercaDeOgrini = false;
+            return;
+        }
+
+        Rectangle hitboxJugador = jugadorLocal.getHitbox();
+
+        // Expandir zona de interacción
+        Rectangle zonaInteraccion = new Rectangle(
+            zonaOgrini.x - DISTANCIA_INTERACCION,
+            zonaOgrini.y - DISTANCIA_INTERACCION,
+            zonaOgrini.width + DISTANCIA_INTERACCION * 2,
+            zonaOgrini.height + DISTANCIA_INTERACCION * 2
+        );
+
+        boolean estabaCerca = jugadorCercaDeOgrini;
+        jugadorCercaDeOgrini = zonaInteraccion.overlaps(hitboxJugador);
+
+        // Debug (opcional - puedes comentar estas líneas después)
+        if (estabaCerca != jugadorCercaDeOgrini) {
+            System.out.println(jugadorCercaDeOgrini ?
+                "🛒 Cerca de Ogrini - Presiona T" :
+                "🚶 Lejos de Ogrini");
+        }
     }
 
     private Texture generarTextura() {

@@ -51,8 +51,6 @@ public class Hud {
         com.badlogic.gdx.math.Matrix4 originalProjection = batch.getProjectionMatrix().cpy();
         batch.setProjectionMatrix(new com.badlogic.gdx.math.Matrix4().setToOrtho2D(0, 0, viewport.getScreenWidth(), viewport.getScreenHeight()));
 
-
-
         float screenWidth = viewport.getScreenWidth();
         float screenHeight = viewport.getScreenHeight();
 
@@ -103,7 +101,38 @@ public class Hud {
         batch.setProjectionMatrix(originalProjection);
     }
 
+    // ✅ NUEVO: Indicador de tienda
+    public void dibujarIndicadorTienda(SpriteBatch batch, boolean mostrar) {
+        if (!mostrar) return;
 
+        // Guardar proyección
+        com.badlogic.gdx.math.Matrix4 originalProjection = batch.getProjectionMatrix().cpy();
+        batch.setProjectionMatrix(new com.badlogic.gdx.math.Matrix4().setToOrtho2D(
+            0, 0, viewport.getScreenWidth(), viewport.getScreenHeight()));
+
+        float screenWidth = viewport.getScreenWidth();
+        float screenHeight = viewport.getScreenHeight();
+
+        // Texto parpadeante
+        float alpha = 0.5f + 0.5f * (float)Math.sin(System.currentTimeMillis() / 200.0);
+        font.setColor(0f, 1f, 0f, alpha); // Verde parpadeante
+
+        String texto = "Presiona [T] para abrir tienda";
+        layout.setText(font, texto);
+
+        float x = (screenWidth - layout.width) / 2f;
+        float y = screenHeight - 120f;
+
+        font.draw(batch, texto, x, y);
+
+        // Restaurar proyección
+        batch.setProjectionMatrix(originalProjection);
+        font.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+    }
+
+    /**
+     * ✅ Actualiza la vida mostrada (recibida del servidor)
+     */
     public void actualizarVida(int vida, int vidaMaxima) {
         this.vidaActual = vida;
         this.vidaMaxima = vidaMaxima;

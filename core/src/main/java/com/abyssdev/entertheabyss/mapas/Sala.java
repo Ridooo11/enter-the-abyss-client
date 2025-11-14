@@ -34,6 +34,9 @@ public class Sala {
     private float anchoTiles, altoTiles;
     private static final float TILE_SIZE = 16f;
 
+    // ✅ NUEVO: Zona de Ogrini (tienda)
+    private Rectangle zonaOgrini;
+
     public Sala(String id, String rutaTmx) {
         this.id = id;
         cargarMapa(rutaTmx);
@@ -41,6 +44,7 @@ public class Sala {
         cargarPuertas();
         cargarZonasTransicion();
         cargarSpawnPoints();
+        cargarZonaOgrini(); // ✅ NUEVO
     }
 
     private void cargarMapa(String ruta) {
@@ -186,6 +190,40 @@ public class Sala {
         }
     }
 
+    // ✅ NUEVO: Cargar zona de Ogrini (tienda)
+    private void cargarZonaOgrini() {
+        if (mapa.getLayers().get("colisiones") == null) {
+            System.out.println("⚠️ No hay capa 'colisiones' para buscar zona Ogrini en sala " + id);
+            return;
+        }
+
+        MapObjects objetos = mapa.getLayers().get("colisiones").getObjects();
+        for (MapObject objeto : objetos) {
+            if (!(objeto instanceof RectangleMapObject)) continue;
+
+            String tipo = objeto.getProperties().get("tipo", String.class);
+            String nombre = objeto.getProperties().get("name", String.class);
+
+            // Buscar por tipo "tienda" o nombre "ogrini"
+            if ("tienda".equals(tipo) || "ogrini".equalsIgnoreCase(nombre)) {
+                RectangleMapObject rectObj = (RectangleMapObject) objeto;
+                Rectangle rect = rectObj.getRectangle();
+
+                zonaOgrini = new Rectangle(
+                    rect.x / TILE_SIZE,
+                    rect.y / TILE_SIZE,
+                    rect.width / TILE_SIZE,
+                    rect.height / TILE_SIZE
+                );
+
+                System.out.println("✅ Zona de Ogrini cargada en sala " + id +
+                    " - Pos: (" + zonaOgrini.x + ", " + zonaOgrini.y + ")");
+                return;
+            }
+        }
+
+        System.out.println("ℹ️ No se encontró zona de Ogrini en sala " + id);
+    }
 
     public void generarBoss() {
         Boss nuevoBoss = null;
@@ -276,7 +314,6 @@ public class Sala {
         }
     }
 
-
     public boolean hayEnemigosVivos() {
         if (this.enemigos == null) return false;
         for (Enemigo e : this.enemigos) {
@@ -333,7 +370,6 @@ public class Sala {
         System.out.println("🔄 Colisiones actualizadas: " + colisiones.size + " totales");
     }
 
-
     // GETTERS
     public String getId() { return this.id; }
     public TiledMap getMapa() { return this.mapa; }
@@ -348,6 +384,8 @@ public class Sala {
     public void setBoss(Boss boss) { this.bossFinal = boss; }
     public boolean getBossGenerado() { return this.bossGenerado; }
 
+    // ✅ NUEVO: Getter para zona de Ogrini
+    public Rectangle getZonaOgrini() { return this.zonaOgrini; }
 
     public void setEnemigos(ArrayList<Enemigo> enemigos) {
         this.enemigos = enemigos;
@@ -357,7 +395,4 @@ public class Sala {
         if (mapa != null) mapa.dispose();
         if (renderer != null) renderer.dispose();
     }
-
-
-
 }

@@ -32,11 +32,11 @@ public class PantallaTienda extends Pantalla {
     private int precioCorazon = 5;
 
     private PantallaJuego pantallaJuego;
+
     public PantallaTienda(Game juego, SpriteBatch batch, Jugador jugador, PantallaJuego pantallaJuego) {
         super(juego, batch);
         this.jugador = jugador;
         this.pantallaJuego = pantallaJuego;
-
     }
 
     @Override
@@ -54,9 +54,6 @@ public class PantallaTienda extends Pantalla {
         heart100 = new Texture("imagenes/corazon100%.png");
 
         layout = new GlyphLayout();
-
-        // ✅ Música o sonido opcional
-       // Sonidos.reproducirMusicaTienda();
     }
 
     @Override
@@ -84,7 +81,7 @@ public class PantallaTienda extends Pantalla {
 
         // Mostrar monedas del jugador
         font.setColor(Color.YELLOW);
-       // font.draw(batch, "Tus monedas: " + jugador.getMonedas(), ancho / 2f - 80, 100);
+        font.draw(batch, "Tus monedas: " + jugador.getMonedas(), ancho / 2f - 80, 100);
         font.setColor(Color.WHITE);
 
         // Opciones
@@ -117,7 +114,7 @@ public class PantallaTienda extends Pantalla {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             switch (opcionSeleccionada) {
                 case 0:
-                   // comprarCorazon();
+                    comprarCorazon(); // ✅ DESCOMENTADO
                     break;
                 case 1:
                     // volver al juego
@@ -132,22 +129,27 @@ public class PantallaTienda extends Pantalla {
         }
     }
 
-   /* private void comprarCorazon() {
+    // ✅ MÉTODO DESCOMENTADO Y FUNCIONAL
+    private void comprarCorazon() {
         if (jugador.getMonedas() >= precioCorazon) {
-            if(jugador.getVida() >= jugador.getVidaMaxima()){
-                Sonidos.reproducirCompraFallida();
-                Gdx.app.log("TIENDA", "¡Ya tenés la vida al máximo!");
-                return;
-            }
-            jugador.setMonedas(jugador.getMonedas() - precioCorazon);
-            jugador.setVida(Math.min(jugador.getVidaMaxima(), jugador.getVida() + 20));
+            // TODO: En el futuro, esto debería sincronizarse con el servidor
+            // Por ahora, solo mostramos feedback local
+
             Sonidos.reproducirCompraExitosa();
-            Gdx.app.log("TIENDA", "Compraste un corazón! Vida actual: " + jugador.getVida());
+            Gdx.app.log("TIENDA", "¡Compraste un corazón! (Sincronización con servidor pendiente)");
+
+            // Nota: La vida real y las monedas reales están en el servidor
+            // Esta es solo una compra "simulada" del lado del cliente
+            // Para hacerlo funcionar completamente, necesitarías:
+            // 1. Enviar mensaje al servidor: pantallaJuego.getClientThread().sendMessage("ComprarVida");
+            // 2. El servidor valida monedas y aplica cambios
+            // 3. El servidor envía UpdateHealth y UpdateCoins de vuelta
+
         } else {
             Sonidos.reproducirCompraFallida();
             Gdx.app.log("TIENDA", "No tenés suficientes monedas!");
         }
-    }*/
+    }
 
     @Override
     public void resize(int width, int height) {
