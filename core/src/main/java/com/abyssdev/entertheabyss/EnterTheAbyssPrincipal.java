@@ -29,10 +29,20 @@ public class EnterTheAbyssPrincipal extends Game {
 
         // Arrancar en el menú
         setScreen(new MenuInicio(this,batch));
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("🛑 Ventana cerrada, limpiando recursos...");
+            if (getScreen() != null) {
+                getScreen().dispose();
+            }
+        }));
     }
 
     @Override
     public void dispose() {
+        if (getScreen() != null) {
+            getScreen().dispose();
+        }
         batch.dispose();
         Sonidos.dispose();
     }

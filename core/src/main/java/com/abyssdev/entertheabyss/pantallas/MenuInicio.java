@@ -61,6 +61,7 @@ public class MenuInicio extends Pantalla {
         actualizarAnimaciones(delta);
         manejarInput();
 
+        viewport.apply();
         camara.update();
         batch.setProjectionMatrix(camara.combined);
 

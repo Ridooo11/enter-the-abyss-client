@@ -220,14 +220,33 @@ public class ClientThread extends Thread {
                 }
                 break;
 
-            case "EndGame":
-                gameController.endGame();
+
+            case "WingmanDisconnected":
+                // ✅ El otro jugador se desconectó
+                if (parts.length >= 2) {
+                    int numPlayerDesconectado = Integer.parseInt(parts[1]);
+                    System.out.println("⚠️ Jugador " + numPlayerDesconectado + " se desconectó");
+                }
+                break;
+
+            case "ForceDisconnect":
+
+                System.out.println("🔴 Servidor forzó desconexión - Volviendo al menú");
+
+                this.end = true; // ✅ Detener el hilo primero
+
+                Gdx.app.postRunnable(() -> {
+                    gameController.backToMenu();
+                });
                 break;
 
             case "Disconnect":
                 System.out.println("🔌 Servidor desconectado");
-                gameController.backToMenu();
-                this.end = true;
+                this.end = true; // ✅ Detener el hilo primero
+
+                Gdx.app.postRunnable(() -> {
+                    gameController.backToMenu();
+                });
                 break;
 
             case "NotConnected":

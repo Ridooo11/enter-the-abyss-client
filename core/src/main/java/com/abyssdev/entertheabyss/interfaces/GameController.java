@@ -14,7 +14,6 @@ public interface GameController {
     void updateRoomChange(String roomId);
     void updateDoorOpened(String roomId);
     void playerAttack(int numPlayer);
-    void endGame();
     void backToMenu();
     void syncEnemies(String enemiesData);
     void spawnEnemy(int id, float x, float y);
@@ -29,4 +28,5 @@ public interface GameController {
 
     void playerDied(int numPlayer);
     void showGameOver();
+    void mostrarMensajeDesconexion(String mensaje);
 }

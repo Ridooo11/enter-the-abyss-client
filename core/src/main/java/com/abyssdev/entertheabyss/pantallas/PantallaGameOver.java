@@ -1,5 +1,3 @@
-// Modificar PantallaGameOver.java:
-
 package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.ui.FontManager;
@@ -33,8 +31,17 @@ public class PantallaGameOver extends Pantalla {
     private Viewport viewport;
     private OrthographicCamera camara;
 
+    // ✅ AGREGAR REFERENCIA A PANTALLA JUEGO PARA LIMPIAR CONEXIÓN
+    private PantallaJuego pantallaJuegoAnterior;
+
     public PantallaGameOver(Game juego, SpriteBatch batch) {
         super(juego, batch);
+    }
+
+    // ✅ NUEVO CONSTRUCTOR CON REFERENCIA
+    public PantallaGameOver(Game juego, SpriteBatch batch, PantallaJuego pantallaJuego) {
+        super(juego, batch);
+        this.pantallaJuegoAnterior = pantallaJuego;
     }
 
     @Override
@@ -115,22 +122,26 @@ public class PantallaGameOver extends Pantalla {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             switch (opcionSeleccionada) {
                 case 0: // Volver al Menu
+                    System.out.println("🔙 Volviendo al menú desde Game Over");
                     Sonidos.detenerTodaMusica();
                     Sonidos.reproducirMusicaMenu();
 
-                    // ✅ LLAMAR AL DISPOSE DE LA PANTALLA ANTERIOR PARA DESCONECTAR
-                    if (juego.getScreen() != null) {
-                        juego.getScreen().dispose();
+                    // ✅ DESCONECTAR ANTES DE CAMBIAR DE PANTALLA
+                    if (pantallaJuegoAnterior != null) {
+                        pantallaJuegoAnterior.dispose();
                     }
 
                     juego.setScreen(new MenuInicio(juego, batch));
                     break;
 
                 case 1: // Salir
+                    System.out.println("👋 Saliendo del juego desde Game Over");
+
                     // ✅ DESCONECTAR ANTES DE SALIR
-                    if (juego.getScreen() != null) {
-                        juego.getScreen().dispose();
+                    if (pantallaJuegoAnterior != null) {
+                        pantallaJuegoAnterior.dispose();
                     }
+
                     Gdx.app.exit();
                     break;
             }
@@ -141,6 +152,12 @@ public class PantallaGameOver extends Pantalla {
     public void dispose() {
         if (fondoPausa != null) {
             fondoPausa.dispose();
+        }
+
+        // ✅ ASEGURAR LIMPIEZA AL SALIR DE ESTA PANTALLA
+        if (pantallaJuegoAnterior != null) {
+            pantallaJuegoAnterior.dispose();
+            pantallaJuegoAnterior = null;
         }
     }
 }

@@ -122,7 +122,6 @@ public class PantallaArbolHabilidades extends Pantalla {
 
         // Dibuja el mensaje temporal
         if (!mensaje.isEmpty()) {
-            font.getData().setScale(1.5f); // Puedes aumentar un poco la escala si quieres que destaque más
             font.setColor(Color.CYAN); // Mantener el color o cambiarlo a Color.RED para errores
 
             // Calcula el ancho del texto para centrarlo
@@ -471,7 +470,6 @@ public class PantallaArbolHabilidades extends Pantalla {
     public void dispose() {
         batch.dispose();
         shapeRenderer.dispose();
-        font.dispose();
         fondo.dispose();
     }
 }

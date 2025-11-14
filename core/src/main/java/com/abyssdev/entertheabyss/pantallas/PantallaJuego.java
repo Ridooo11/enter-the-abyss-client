@@ -540,31 +540,7 @@ public class PantallaJuego extends Pantalla implements GameController {
         // Aquí podrías reproducir una animación/sonido de ataque
     }
 
-    @Override
-    public void endGame() {
-        Gdx.app.postRunnable(new Runnable() {
-            @Override
-            public void run() {
-                clientThread.sendMessage("Disconnect");
-                clientThread.terminate();
-                juego.setScreen(new PantallaGameOver(juego, batch));
-            }
-        });
-    }
 
-    @Override
-    public void backToMenu() {
-        System.out.println("🔙 Volviendo al menú");
-
-        Gdx.app.postRunnable(new Runnable() {
-            @Override
-            public void run() {
-                clientThread.sendMessage("Disconnect");
-                clientThread.terminate();
-                juego.setScreen(new MenuInicio(juego, batch));
-            }
-        });
-    }
 
     @Override
     public void syncEnemies(String enemiesData) {
@@ -750,8 +726,34 @@ public class PantallaJuego extends Pantalla implements GameController {
             Sonidos.detenerTodaMusica();
 
             // Cambiar a pantalla Game Over
-            juego.setScreen(new PantallaGameOver(juego, batch));
+            juego.setScreen(new PantallaGameOver(juego, batch, this));
         });
+    }
+
+    @Override
+    public void mostrarMensajeDesconexion(String mensaje) {
+        System.out.println("⚠️ " + mensaje);
+        // ✅ NO hacer nada aquí, esperar ForceDisconnect
+    }
+
+    @Override
+    public void backToMenu() {
+        System.out.println("🔙 Volviendo al menú desde cliente");
+
+        // ✅ DESCONECTAR ANTES DE CAMBIAR DE PANTALLA
+        if (clientThread != null && !clientThread.isInterrupted()) {
+            clientThread.sendMessage("Disconnect");
+            clientThread.terminate();
+        }
+
+        // ✅ LIMPIAR INPUT PROCESSOR
+        Gdx.input.setInputProcessor(null);
+
+        // Volver al menú
+        Sonidos.detenerTodaMusica();
+        Sonidos.reproducirMusicaMenu();
+
+        juego.setScreen(new MenuInicio(juego, batch));
     }
 
 
@@ -782,23 +784,44 @@ public class PantallaJuego extends Pantalla implements GameController {
 
     @Override
     public void dispose() {
+        System.out.println("🔴 Dispose llamado en PantallaJuego (Cliente)");
+
+        // ✅ DESACTIVAR INPUT PROCESSOR PRIMERO
+        if (inputProcessor != null) {
+            inputProcessor.desactivar();
+        }
+        Gdx.input.setInputProcessor(null);
+
+        // Desconectar del servidor
         if (clientThread != null && !clientThread.isInterrupted()) {
             clientThread.sendMessage("Disconnect");
             clientThread.terminate();
+
+            try {
+                clientThread.join(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+
+        // Limpiar recursos
         if (mapaActual != null) {
             mapaActual.dispose();
         }
-        if (hud != null) {
-            hud.dispose();
-        }
+        /*hud.dispose();
+        }*/
         for (Jugador jugador : jugadores.values()) {
             jugador.dispose();
         }
         if (texturaFade != null) {
             texturaFade.dispose();
         }
-        System.out.println("🔴 Cliente desconectado");
+
+        yaInicializado = false;
+        conectado = false;
+        juegoIniciado = false;
+
+        System.out.println("🔴 Cliente completamente desconectado");
     }
 
     public Sala getSalaActual() {

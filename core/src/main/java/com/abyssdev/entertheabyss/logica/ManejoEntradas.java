@@ -10,6 +10,7 @@ public class ManejoEntradas implements InputProcessor {
     private ClientThread clientThread;
 
     private boolean arriba, abajo, izquierda, derecha;
+    private boolean activo = true;
 
     public ManejoEntradas(Jugador jugador, ClientThread clientThread) {
         this.jugador = jugador;
@@ -18,6 +19,7 @@ public class ManejoEntradas implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
+        if (!activo) return false;
         switch (keycode) {
             case Input.Keys.W: arriba = true; break;
             case Input.Keys.S: abajo = true; break;
@@ -39,6 +41,7 @@ public class ManejoEntradas implements InputProcessor {
 
     @Override
     public boolean keyUp(int keycode) {
+        if (!activo) return false;
         switch (keycode) {
             case Input.Keys.W: arriba = false; break;
             case Input.Keys.S: abajo = false; break;
@@ -51,13 +54,21 @@ public class ManejoEntradas implements InputProcessor {
     }
 
     private void enviarEstado() {
+        if (!activo || clientThread == null) return;
         String mensaje = "Input:" + arriba + ":" + abajo + ":" + izquierda + ":" + derecha;
         clientThread.sendMessage(mensaje);
     }
 
     public void enviarEstado(boolean arriba, boolean abajo, boolean izquierda, boolean derecha) {
+        if (!activo || clientThread == null) return;
         String mensaje = "Input:" + arriba + ":" + abajo + ":" + izquierda + ":" + derecha;
         clientThread.sendMessage(mensaje);
+    }
+
+    // ✅ NUEVO: Método para desactivar el procesamiento
+    public void desactivar() {
+        this.activo = false;
+        System.out.println("🔇 Input processor desactivado");
     }
 
     // Métodos no usados
