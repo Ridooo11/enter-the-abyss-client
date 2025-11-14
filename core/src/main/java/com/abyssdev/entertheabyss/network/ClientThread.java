@@ -21,7 +21,7 @@ public class ClientThread extends Thread {
 
     private DatagramSocket socket;
     private int serverPort = 9999;
-    private String ipServerStr = "127.0.0.1"; // Localhost por defecto
+    private String ipServerStr = "255.255.255.255"; // 127.0.0.1 Localhost por defecto
     private InetAddress ipServer;
     private boolean end = false;
     private PantallaJuego gameController;
