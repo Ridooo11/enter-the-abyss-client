@@ -1,6 +1,7 @@
 package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.personajes.Jugador;
+import com.abyssdev.entertheabyss.ui.FontManager;
 import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -17,11 +18,14 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class PantallaTienda extends Pantalla {
 
-    private BitmapFont font;
+    private BitmapFont fontTitulo;
+    private BitmapFont fontOpciones;
+    private BitmapFont fontInfo;
     private Texture fondoTienda;
     private Texture heart100;
+    private Texture moneda;
 
-    private final String[] opciones = {"Comprar corazón", "Volver al juego"};
+    private final String[] opciones = {"COMPRAR CORAZÓN", "VOLVER AL JUEGO"};
     private int opcionSeleccionada = 0;
 
     private GlyphLayout layout;
@@ -33,6 +37,14 @@ public class PantallaTienda extends Pantalla {
 
     private PantallaJuego pantallaJuego;
 
+    // Animación
+    private float tiempoParpadeo = 0;
+    private float alphaParpadeo = 1f;
+
+    // Mensajes de compra
+    private String mensajeCompra = null;
+    private float tiempoMensaje = 0;
+
     public PantallaTienda(Game juego, SpriteBatch batch, Jugador jugador, PantallaJuego pantallaJuego) {
         super(juego, batch);
         this.jugador = jugador;
@@ -41,8 +53,10 @@ public class PantallaTienda extends Pantalla {
 
     @Override
     public void show() {
-        font = new BitmapFont();
-        font.getData().setScale(1.8f);
+        fontTitulo = FontManager.getInstance().getTitulo();
+        fontOpciones = FontManager.getInstance().getGrande();
+        fontInfo = FontManager.getInstance().getMediana();
+        layout = new GlyphLayout();
 
         camara = new OrthographicCamera();
         viewport = new FitViewport(800, 600, camara);
@@ -50,16 +64,20 @@ public class PantallaTienda extends Pantalla {
         camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
         camara.update();
 
-        fondoTienda = new Texture("Fondos/fondotienda.jpg");
+        fondoTienda = new Texture("Fondos/OgroTienda.png");
         heart100 = new Texture("imagenes/corazon100%.png");
+        moneda = new Texture("imagenes/moneda.png");
 
-        layout = new GlyphLayout();
+        System.out.println("✅ Tienda cargada correctamente (SERVIDOR)");
     }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        tiempoParpadeo += delta;
+        alphaParpadeo = 0.7f + 0.3f * (float) Math.sin(tiempoParpadeo * 4);
 
         manejarInput();
 
@@ -68,35 +86,63 @@ public class PantallaTienda extends Pantalla {
 
         float ancho = viewport.getWorldWidth();
         float alto = viewport.getWorldHeight();
+        float centerX = ancho / 2f;
 
         batch.begin();
+
+        // ===== FONDO =====
         batch.draw(fondoTienda, 0, 0, ancho, alto);
 
-        font.setColor(Color.WHITE);
-        font.draw(batch, "Tienda de Ogrini", ancho / 2f - 160, alto - 50);
+        // ===== TÍTULO =====
+        fontTitulo.setColor(Color.WHITE);
+        String titulo = "TIENDA DE OGRINI";
+        layout.setText(fontTitulo, titulo);
+        fontTitulo.draw(batch, titulo, centerX - layout.width / 2f, alto - 40);
 
-        // Dibujar ítem de corazón
-        batch.draw(heart100, ancho / 2f - 200, alto / 2f + 40, 64, 64);
-        font.draw(batch, "Precio: " + precioCorazon + " monedas", ancho / 2f - 120, alto / 2f + 60);
+        // ===== MONEDAS ARRIBA DERECHA =====
+        float monedasX = ancho - 150;
+        float monedasY = alto - 60;
 
-        // Mostrar monedas del jugador
-        font.setColor(Color.YELLOW);
-        font.draw(batch, "Tus monedas: " + jugador.getMonedas(), ancho / 2f - 80, 100);
-        font.setColor(Color.WHITE);
+        batch.draw(moneda, monedasX, monedasY - 95, 40, 40);
 
-        // Opciones
-        float baseY = alto / 2f - 50;
+        fontInfo.setColor(Color.GOLD);
+        String textoMonedas = "x " + jugador.getMonedas();
+        fontInfo.draw(batch, textoMonedas, monedasX + 50, monedasY - 60);
+
+        // ===== OPCIONES MÁS CHICAS Y MÁS ARRIBA =====
+        fontOpciones.getData().setScale(0.75f);
+
+        float startY = 310;     // debajo de la boca
+        float espacioOpciones = 55f;
+
         for (int i = 0; i < opciones.length; i++) {
-            layout.setText(font, opciones[i]);
-            float x = ancho / 2f - layout.width / 2f;
-            float y = baseY - i * 60;
+            String texto = opciones[i];
+            layout.setText(fontOpciones, texto);
 
-            if (i == opcionSeleccionada)
-                font.setColor(Color.GOLD);
-            else
-                font.setColor(Color.WHITE);
+            float x = centerX - layout.width / 2f;
+            float y = startY - (i * espacioOpciones);
 
-            font.draw(batch, opciones[i], x, y);
+            if (i == opcionSeleccionada) {
+                fontOpciones.setColor(Color.GOLD);
+                float offset = 5f * (float) Math.sin(tiempoParpadeo * 6);
+
+                fontOpciones.draw(batch, ">", x - 40 - offset, y);
+                fontOpciones.draw(batch, "<", x + layout.width + 20 + offset, y);
+            } else {
+                fontOpciones.setColor(0.7f, 0.7f, 0.7f, 0.8f);
+            }
+
+            fontOpciones.draw(batch, texto, x, y);
+        }
+
+        // ===== MENSAJE DE COMPRA =====
+        if (mensajeCompra != null && tiempoMensaje > 0) {
+            fontInfo.setColor(Color.WHITE);
+            layout.setText(fontInfo, mensajeCompra);
+            fontInfo.draw(batch, mensajeCompra,
+                centerX - layout.width / 2f,
+                70); // debajo del cartel SHOP
+            tiempoMensaje -= delta;
         }
 
         batch.end();
@@ -105,19 +151,20 @@ public class PantallaTienda extends Pantalla {
     private void manejarInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S)) {
             opcionSeleccionada = (opcionSeleccionada + 1) % opciones.length;
+            tiempoParpadeo = 0;
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W)) {
             opcionSeleccionada = (opcionSeleccionada - 1 + opciones.length) % opciones.length;
+            tiempoParpadeo = 0;
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             switch (opcionSeleccionada) {
                 case 0:
-                    comprarCorazon(); // ✅ DESCOMENTADO
+                    comprarCorazon();
                     break;
                 case 1:
-                    // volver al juego
                     juego.setScreen(pantallaJuego);
                     break;
             }
@@ -129,21 +176,18 @@ public class PantallaTienda extends Pantalla {
         }
     }
 
-    // ✅ MÉTODO DESCOMENTADO Y FUNCIONAL
     private void comprarCorazon() {
-        // Verificación local primero (feedback inmediato)
+
         if (jugador.getMonedas() < precioCorazon) {
             Sonidos.reproducirCompraFallida();
-            Gdx.app.log("TIENDA", "No tenés suficientes monedas!");
+            mensajeCompra = "No tenés suficientes monedas";
+            tiempoMensaje = 2;
             return;
         }
 
-        // ✅ Enviar solicitud al servidor
-        System.out.println("📤 Enviando solicitud de compra de vida al servidor...");
         pantallaJuego.getClientThread().sendMessage("ComprarVida:" + precioCorazon);
-
-        // El servidor responderá con CompraVidaExitosa o CompraVidaFallida
     }
+
 
     @Override
     public void resize(int width, int height) {
@@ -154,8 +198,9 @@ public class PantallaTienda extends Pantalla {
 
     @Override
     public void dispose() {
-        font.dispose();
-        fondoTienda.dispose();
-        heart100.dispose();
+        if (fondoTienda != null) fondoTienda.dispose();
+        if (heart100 != null) heart100.dispose();
+        if (moneda != null) moneda.dispose();
+        System.out.println("🧹 Tienda limpiada (SERVIDOR)");
     }
 }
