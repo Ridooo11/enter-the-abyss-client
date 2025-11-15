@@ -29,4 +29,5 @@ public interface GameController {
     void playerDied(int numPlayer);
     void showGameOver();
     void mostrarMensajeDesconexion(String mensaje);
+    int getMiNumeroJugador(); // ✅ NUEVO - Para saber qué jugador somos
 }

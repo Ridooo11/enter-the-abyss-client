@@ -21,7 +21,7 @@ public class PantallaTienda extends Pantalla {
     private Texture fondoTienda;
     private Texture heart100;
 
-    private final String[] opciones = {"Comprar corazón (+20 vida)", "Volver al juego"};
+    private final String[] opciones = {"Comprar corazón", "Volver al juego"};
     private int opcionSeleccionada = 0;
 
     private GlyphLayout layout;
@@ -29,7 +29,7 @@ public class PantallaTienda extends Pantalla {
     private OrthographicCamera camara;
 
     private Jugador jugador;
-    private int precioCorazon = 5;
+    private int precioCorazon = 20;
 
     private PantallaJuego pantallaJuego;
 
@@ -131,24 +131,18 @@ public class PantallaTienda extends Pantalla {
 
     // ✅ MÉTODO DESCOMENTADO Y FUNCIONAL
     private void comprarCorazon() {
-        if (jugador.getMonedas() >= precioCorazon) {
-            // TODO: En el futuro, esto debería sincronizarse con el servidor
-            // Por ahora, solo mostramos feedback local
-
-            Sonidos.reproducirCompraExitosa();
-            Gdx.app.log("TIENDA", "¡Compraste un corazón! (Sincronización con servidor pendiente)");
-
-            // Nota: La vida real y las monedas reales están en el servidor
-            // Esta es solo una compra "simulada" del lado del cliente
-            // Para hacerlo funcionar completamente, necesitarías:
-            // 1. Enviar mensaje al servidor: pantallaJuego.getClientThread().sendMessage("ComprarVida");
-            // 2. El servidor valida monedas y aplica cambios
-            // 3. El servidor envía UpdateHealth y UpdateCoins de vuelta
-
-        } else {
+        // Verificación local primero (feedback inmediato)
+        if (jugador.getMonedas() < precioCorazon) {
             Sonidos.reproducirCompraFallida();
             Gdx.app.log("TIENDA", "No tenés suficientes monedas!");
+            return;
         }
+
+        // ✅ Enviar solicitud al servidor
+        System.out.println("📤 Enviando solicitud de compra de vida al servidor...");
+        pantallaJuego.getClientThread().sendMessage("ComprarVida:" + precioCorazon);
+
+        // El servidor responderá con CompraVidaExitosa o CompraVidaFallida
     }
 
     @Override

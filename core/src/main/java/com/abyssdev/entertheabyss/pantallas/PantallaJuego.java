@@ -799,6 +799,11 @@ public class PantallaJuego extends Pantalla implements GameController {
     }
 
     @Override
+    public int getMiNumeroJugador() {
+        return miNumeroJugador;
+    }
+
+    @Override
     public void backToMenu() {
         System.out.println("🔙 Volviendo al menú desde cliente");
 

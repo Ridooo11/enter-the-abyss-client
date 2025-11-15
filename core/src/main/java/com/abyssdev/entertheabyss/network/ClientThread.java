@@ -211,6 +211,32 @@ public class ClientThread extends Thread {
                 }
                 break;
 
+            case "CompraVidaExitosa":
+                // CompraVidaExitosa:vidaNueva:monedasNuevas
+                if (parts.length >= 3) {
+                    int vidaNueva = Integer.parseInt(parts[1]);
+                    int monedasNuevas = Integer.parseInt(parts[2]);
+
+                    Gdx.app.postRunnable(() -> {
+                        gameController.updateHealth(gameController.getMiNumeroJugador(), vidaNueva);
+                        gameController.updateCoins(gameController.getMiNumeroJugador(), monedasNuevas);
+                        Sonidos.reproducirCompraExitosa();
+                        System.out.println("✅ Compra de vida exitosa! Vida: " + vidaNueva + ", Monedas: " + monedasNuevas);
+                    });
+                }
+                break;
+
+            case "CompraVidaFallida":
+                // CompraVidaFallida:razon
+                if (parts.length >= 2) {
+                    String razon = parts[1];
+                    Gdx.app.postRunnable(() -> {
+                        Sonidos.reproducirCompraFallida();
+                        System.out.println("❌ Compra de vida fallida: " + razon);
+                    });
+                }
+                break;
+
 
             case "PlayerAttack":
                 // PlayerAttack:numPlayer
