@@ -833,7 +833,7 @@ public class PantallaJuego extends Pantalla implements GameController {
             // Detener música del juego
             Sonidos.detenerTodaMusica();
 
-            // Cambiar a pantalla Game Over
+            // Cambiar a pantalla Win
             juego.setScreen(new PantallaWin(juego, batch, this));
         });
     }

@@ -36,9 +36,11 @@ public class PantallaWin extends Pantalla {
 
     // ✅ AGREGAR REFERENCIA A PANTALLA JUEGO PARA LIMPIAR CONEXIÓN
     private PantallaJuego pantallaJuegoAnterior;
+
+
     public PantallaWin(Game juego,SpriteBatch batch, PantallaJuego pantallaJuego ) {
         super(juego,batch);
-        pantallaJuegoAnterior = pantallaJuego;
+        this.pantallaJuegoAnterior = pantallaJuego;
     }
 
     @Override
@@ -139,6 +141,7 @@ public class PantallaWin extends Pantalla {
                     if (pantallaJuegoAnterior != null) {
                         pantallaJuegoAnterior.dispose();
                     }
+
 
                     Gdx.app.exit();
                     break;
