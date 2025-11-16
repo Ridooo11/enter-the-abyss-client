@@ -30,4 +30,6 @@ public interface GameController {
     void showGameOver();
     void mostrarMensajeDesconexion(String mensaje);
     int getMiNumeroJugador(); // ✅ NUEVO - Para saber qué jugador somos
+
+    void showWinGame();
 }

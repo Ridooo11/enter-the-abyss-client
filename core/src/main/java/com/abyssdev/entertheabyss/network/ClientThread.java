@@ -175,12 +175,14 @@ public class ClientThread extends Thread {
                 }
                 break;
 
+            // ✅ VERIFICAR EN processMessage() (línea ~93-102):
             case "Habilidades":
-                // Habilidades:Vida Extra,0;Fuerza,1;...
+                // Habilidades:Vida Extra,0;Fuerza,1;...:150
                 if (parts.length >= 2) {
-                    String datosHabilidades = parts[1];
+                    // parts[1] contiene todo: "habilidades:monedas"
+                    String datosCompletos = message.substring(message.indexOf(":") + 1);
                     Gdx.app.postRunnable(() -> {
-                        gameController.mostrarArbolHabilidades(datosHabilidades);
+                        gameController.mostrarArbolHabilidades(datosCompletos);
                     });
                 }
                 break;
@@ -317,6 +319,14 @@ public class ClientThread extends Thread {
                     gameController.showGameOver();
                 });
                 break;
+
+            case "WinGame":
+                Gdx.app.postRunnable(() -> {
+                    gameController.showWinGame();
+                });
+                break;
+
+
 
             default:
                 System.out.println("⚠️ Mensaje desconocido: " + parts[0]);

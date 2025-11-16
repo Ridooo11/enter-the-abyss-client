@@ -397,14 +397,15 @@ public class PantallaArbolHabilidades extends Pantalla {
         }
     }
 
+    // ✅ MODIFICAR intentarCompra() (línea ~264-295):
     private void intentarCompra(Habilidad habilidad) {
         if (habilidad.comprada) {
-            mostrarMensaje("Ya has comprado esta habilidad.");
+            mostrarMensaje("Ya has comprado esta habilidad");
             Sonidos.reproducirCompraFallida();
             return;
         }
 
-        // Verificar dependencias localmente
+        // Validación local (UX rápida)
         int fila = -1, columna = -1;
         for (int f = 0; f < NODOS.length; f++) {
             for (int c = 0; c < NODOS[f].length; c++) {
@@ -416,11 +417,12 @@ public class PantallaArbolHabilidades extends Pantalla {
             }
         }
 
-        if (fila == -1 || columna == -1) {
-            mostrarMensaje("Error: habilidad no encontrada.");
+        if (fila == -1) {
+            mostrarMensaje("Error: habilidad no encontrada");
             return;
         }
 
+        // Verificar dependencias localmente (feedback rápido)
         if (fila > 0) {
             String idSuperior = NODOS[fila - 1][columna];
             Habilidad superior = habilidades.get(idSuperior);
@@ -431,16 +433,18 @@ public class PantallaArbolHabilidades extends Pantalla {
             }
         }
 
+        // Verificar monedas localmente
         if (jugador.getMonedas() < habilidad.getCosto()) {
-            mostrarMensaje("Monedas insuficientes.");
+            mostrarMensaje("Monedas insuficientes");
             Sonidos.reproducirCompraFallida();
             return;
         }
 
-        // ✅ ENVIAR COMPRA AL SERVIDOR
+        // ✅ Enviar solicitud al servidor (él validará de nuevo)
         pantallaJuego.getClientThread().sendMessage("ComprarHabilidad:" + habilidad.getNombre());
-        Sonidos.reproducirCompraExitosa();
         mostrarMensaje("Procesando compra...");
+
+        System.out.println("📤 Solicitud de compra enviada: " + habilidad.getNombre());
     }
 
     // ✅ AGREGAR MÉTODO PÚBLICO PARA ACTUALIZAR

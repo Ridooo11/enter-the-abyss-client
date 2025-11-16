@@ -258,14 +258,17 @@ public class PantallaJuego extends Pantalla implements GameController {
 
 
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.TAB) && conectado && juegoIniciado ) {
+        // ✅ MODIFICAR INPUT TAB (línea ~257-265):
+        if (Gdx.input.isKeyJustPressed(Input.Keys.TAB) && conectado && juegoIniciado) {
             inputProcessor.enviarEstado(false, false, false, false);
             InputProcessor inputActual = Gdx.input.getInputProcessor();
             Gdx.input.setInputProcessor(null);
 
-            PantallaArbolHabilidades arbolHabilidades = new PantallaArbolHabilidades(juego, batch, this, jugadorLocal, jugadorLocal.getHabilidades());
-            arbolHabilidades.setInputAnterior(inputActual);
-            juego.setScreen(arbolHabilidades);
+            // ✅ NUEVO: Solicitar habilidades al servidor
+            System.out.println("📡 Solicitando habilidades al servidor...");
+            clientThread.sendMessage("SolicitarHabilidades");
+
+            // NO crear pantalla aquí, esperar respuesta del servidor
         }
 
 
@@ -669,20 +672,33 @@ public class PantallaJuego extends Pantalla implements GameController {
         });
     }
 
+    // ✅ MODIFICAR mostrarArbolHabilidades() (línea ~494-514):
     @Override
     public void mostrarArbolHabilidades(String datosHabilidades) {
-        // Parsear datos: "Vida Extra,0;Fuerza,1;Velocidad,0;..."
+        // Parsear monedas (último campo)
+        String[] partes = datosHabilidades.split(":");
+        if (partes.length < 2) {
+            System.err.println("❌ Formato inválido de habilidades");
+            return;
+        }
+
+        String habilidadesStr = partes[0];
+        int monedasServidor = Integer.parseInt(partes[1]);
+
+        // Actualizar monedas locales
+        jugadorLocal.setMonedas(monedasServidor);
+
+        // Parsear habilidades: "Vida Extra,0;Fuerza,1;..."
         habilidadesCliente.clear();
+        String[] habilidadesArray = habilidadesStr.split(";");
 
-        String[] habilidadesArray = datosHabilidades.split(";");
         for (String hab : habilidadesArray) {
-            String[] partes = hab.split(",");
-            if (partes.length < 2) continue;
+            String[] info = hab.split(",");
+            if (info.length < 2) continue;
 
-            String nombre = partes[0];
-            boolean comprada = partes[1].equals("1");
+            String nombre = info[0];
+            boolean comprada = info[1].equals("1");
 
-            // Crear instancia de habilidad
             Habilidad habilidad = crearHabilidad(nombre);
             if (habilidad != null) {
                 habilidad.comprada = comprada;
@@ -690,18 +706,22 @@ public class PantallaJuego extends Pantalla implements GameController {
             }
         }
 
-        // Abrir pantalla de árbol de habilidades
-        pantallaHabilidades = new PantallaArbolHabilidades(
-            juego, batch, this, jugadorLocal, habilidadesCliente
-        );
-        juego.setScreen(pantallaHabilidades);
+        // ✅ AHORA SÍ crear la pantalla con datos del servidor
+        Gdx.app.postRunnable(() -> {
+            pantallaHabilidades = new PantallaArbolHabilidades(
+                juego, batch, this, jugadorLocal, habilidadesCliente
+            );
+            juego.setScreen(pantallaHabilidades);
+        });
+
+        System.out.println("✅ Árbol de habilidades cargado desde servidor");
     }
 
+    // ✅ MODIFICAR actualizarHabilidades() (línea ~516-541):
     @Override
     public void actualizarHabilidades(String datosHabilidades, int monedas) {
-        // Actualizar monedas locales
+        // Actualizar monedas
         jugadorLocal.setMonedas(monedas);
-
         if (hud != null) {
             hud.actualizarMonedas(monedas);
         }
@@ -721,18 +741,31 @@ public class PantallaJuego extends Pantalla implements GameController {
             }
         }
 
-        // Si la pantalla de habilidades está activa, notificarla
+        // Notificar a la pantalla si está activa
         if (pantallaHabilidades != null) {
-            pantallaHabilidades.actualizarDatos();
+            Gdx.app.postRunnable(() -> {
+                pantallaHabilidades.actualizarDatos();
+            });
         }
+
+        System.out.println("🔄 Habilidades actualizadas desde servidor");
     }
 
+
+    // ✅ MODIFICAR mostrarMensajeCompraFallida() (línea ~543-551):
     @Override
     public void mostrarMensajeCompraFallida(String nombreHabilidad) {
-        System.out.println("❌ No se pudo comprar: " + nombreHabilidad);
-        // Si la pantalla está activa, mostrar mensaje
+        // Parsear mensaje si viene con razón
+        String[] partes = nombreHabilidad.split(":");
+        String nombre = partes[0];
+        String razon = partes.length > 1 ? partes[1] : "No se pudo comprar";
+
+        System.out.println("❌ " + razon + ": " + nombre);
+
         if (pantallaHabilidades != null) {
-            pantallaHabilidades.mostrarMensaje("No se pudo comprar " + nombreHabilidad);
+            Gdx.app.postRunnable(() -> {
+                pantallaHabilidades.mostrarMensaje(razon);
+            });
         }
     }
 
@@ -793,6 +826,19 @@ public class PantallaJuego extends Pantalla implements GameController {
     }
 
     @Override
+    public void showWinGame() {
+        System.out.println("🎮 Mostrando pantalla Win");
+
+        Gdx.app.postRunnable(() -> {
+            // Detener música del juego
+            Sonidos.detenerTodaMusica();
+
+            // Cambiar a pantalla Game Over
+            juego.setScreen(new PantallaWin(juego, batch, this));
+        });
+    }
+
+    @Override
     public void mostrarMensajeDesconexion(String mensaje) {
         System.out.println("⚠️ " + mensaje);
         // ✅ NO hacer nada aquí, esperar ForceDisconnect
@@ -802,6 +848,8 @@ public class PantallaJuego extends Pantalla implements GameController {
     public int getMiNumeroJugador() {
         return miNumeroJugador;
     }
+
+
 
     @Override
     public void backToMenu() {

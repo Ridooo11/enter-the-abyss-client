@@ -34,8 +34,11 @@ public class PantallaWin extends Pantalla {
     private Viewport viewport;
     private OrthographicCamera camara;
 
-    public PantallaWin(Game juego,SpriteBatch batch) {
+    // ✅ AGREGAR REFERENCIA A PANTALLA JUEGO PARA LIMPIAR CONEXIÓN
+    private PantallaJuego pantallaJuegoAnterior;
+    public PantallaWin(Game juego,SpriteBatch batch, PantallaJuego pantallaJuego ) {
         super(juego,batch);
+        pantallaJuegoAnterior = pantallaJuego;
     }
 
     @Override
@@ -118,9 +121,25 @@ public class PantallaWin extends Pantalla {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             switch (opcionSeleccionada) {
                 case 0:
-                    juego.setScreen(new MenuInicio(juego,batch));
+                    System.out.println("🔙 Volviendo al menú desde Win");
+                    Sonidos.detenerTodaMusica();
+                    Sonidos.reproducirMusicaMenu();
+
+                    // ✅ DESCONECTAR ANTES DE CAMBIAR DE PANTALLA
+                    if (pantallaJuegoAnterior != null) {
+                        pantallaJuegoAnterior.dispose();
+                    }
+
+                    juego.setScreen(new MenuInicio(juego, batch));
                     break;
                 case 1: // Salir
+                    System.out.println("👋 Saliendo del juego desde Win");
+
+                    // ✅ DESCONECTAR ANTES DE SALIR
+                    if (pantallaJuegoAnterior != null) {
+                        pantallaJuegoAnterior.dispose();
+                    }
+
                     Gdx.app.exit();
                     break;
             }
