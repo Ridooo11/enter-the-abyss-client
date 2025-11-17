@@ -34,6 +34,8 @@ public class Hud {
     private int vidaMaxima = 100;
     private int monedasActual = 0;
 
+
+
     public Hud(Jugador jugador, Viewport viewport) {
         this.jugador = jugador;
         this.viewport = viewport;

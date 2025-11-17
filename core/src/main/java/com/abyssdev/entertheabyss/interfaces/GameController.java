@@ -11,9 +11,11 @@ public interface GameController {
     void updateBossDead();
     void updateCoins(int numPlayer, int coins);
     void updateHealth(int numPlayer, int health);
+    void updateMaxHealth(int numPlayer, int maxHealth);
     void updateRoomChange(String roomId);
     void updateDoorOpened(String roomId);
     void playerAttack(int numPlayer);
+    void playerDash(int numPlayer);
     void backToMenu();
     void syncEnemies(String enemiesData);
     void spawnEnemy(int id, float x, float y);

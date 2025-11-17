@@ -2,6 +2,7 @@ package com.abyssdev.entertheabyss.logica;
 
 import com.abyssdev.entertheabyss.network.ClientThread;
 import com.abyssdev.entertheabyss.personajes.Jugador;
+import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 
@@ -27,10 +28,12 @@ public class ManejoEntradas implements InputProcessor {
             case Input.Keys.D: derecha = true; break;
             case Input.Keys.SPACE:
                 clientThread.sendMessage("Attack");
+
                 break;
             case Input.Keys.SHIFT_LEFT:
             case Input.Keys.SHIFT_RIGHT:
                 clientThread.sendMessage("Dash");
+
                 break;
         }
 

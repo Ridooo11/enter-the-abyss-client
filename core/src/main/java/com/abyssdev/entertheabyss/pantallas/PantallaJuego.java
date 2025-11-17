@@ -447,6 +447,7 @@ public class PantallaJuego extends Pantalla implements GameController {
 
             Gdx.input.setInputProcessor(inputProcessor);
         });
+        Sonidos.reproducirMusicaJuego();
     }
 
 
@@ -519,6 +520,18 @@ public class PantallaJuego extends Pantalla implements GameController {
                 }
             }
         });
+    }
+
+    @Override
+    public void updateMaxHealth(int numPlayer, int maxHealth) {
+        if (numPlayer == miNumeroJugador) {
+            vidaMaximaLocal = maxHealth;
+            System.out.println("💚 Vida máxima actualizada: " + maxHealth);
+
+            if (hud != null) {
+                hud.actualizarVida(vidaLocal, vidaMaximaLocal);
+            }
+        }
     }
 
     @Override
@@ -603,9 +616,31 @@ public class PantallaJuego extends Pantalla implements GameController {
     public void playerAttack(int numPlayer) {
         System.out.println("⚔️ Jugador " + numPlayer + " atacó");
         // Aquí podrías reproducir una animación/sonido de ataque
+
     }
 
+    @Override
+    public void playerDash(int numPlayer) {
+        System.out.println("🏃 Jugador " + numPlayer + " usa dash");
 
+        Jugador jugador = jugadores.get(numPlayer);
+        if (jugador != null) {
+            // Activar efecto visual de evasión por 0.3 segundos
+            jugador.mostrarEfectoEvasion(true);
+
+            // Desactivar después de la duración
+            new Thread(() -> {
+                try {
+                    Thread.sleep(300); // 0.3 segundos
+                    Gdx.app.postRunnable(() -> {
+                        jugador.mostrarEfectoEvasion(false);
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        }
+    }
 
     @Override
     public void syncEnemies(String enemiesData) {

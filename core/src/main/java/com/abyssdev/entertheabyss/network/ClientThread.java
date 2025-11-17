@@ -166,7 +166,14 @@ public class ClientThread extends Thread {
                     gameController.updateHealth(playerNum, health);
                 }
                 break;
-
+            case "UpdateMaxHealth":
+                // UpdateMaxHealth:numPlayer:maxHealth
+                if (parts.length >= 3) {
+                    int playerNum = Integer.parseInt(parts[1]);
+                    int maxHealth = Integer.parseInt(parts[2]);
+                    gameController.updateMaxHealth(playerNum, maxHealth);
+                }
+                break;
             case "RoomChange":
                 // RoomChange:roomId
                 if (parts.length >= 2) {
@@ -244,10 +251,20 @@ public class ClientThread extends Thread {
                 // PlayerAttack:numPlayer
                 if (parts.length >= 2) {
                     int attackingPlayer = Integer.parseInt(parts[1]);
+                    Sonidos.reproducirAtaque();
                     gameController.playerAttack(attackingPlayer);
                 }
                 break;
-
+            case "PlayerDash":
+                // PlayerDash:numPlayer
+                if (parts.length >= 2) {
+                    int dashingPlayer = Integer.parseInt(parts[1]);
+                    Sonidos.reproducirEvasion();
+                    Gdx.app.postRunnable(() -> {
+                        gameController.playerDash(dashingPlayer);
+                    });
+                }
+                break;
 
             case "WingmanDisconnected":
                 // ✅ El otro jugador se desconectó
