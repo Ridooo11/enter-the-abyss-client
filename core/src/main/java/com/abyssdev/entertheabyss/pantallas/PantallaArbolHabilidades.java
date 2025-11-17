@@ -5,6 +5,7 @@ import com.abyssdev.entertheabyss.habilidades.*;
 import com.abyssdev.entertheabyss.network.ClientThread;
 import com.abyssdev.entertheabyss.personajes.Jugador;
 import com.abyssdev.entertheabyss.ui.FontManager;
+import com.abyssdev.entertheabyss.ui.Imagenes;
 import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -73,7 +74,7 @@ public class PantallaArbolHabilidades extends Pantalla {
         font = FontManager.getInstance().getPequena();
         layout = new GlyphLayout();
 
-        fondo = new Texture("Fondos/FondoArbol.PNG");
+        fondo = Imagenes.getFondoArbol();
 
         camara = new OrthographicCamera();
         viewport = new FitViewport(1280, 720, camara);

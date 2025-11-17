@@ -1,6 +1,7 @@
 package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.ui.FontManager;
+import com.abyssdev.entertheabyss.ui.Imagenes;
 import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -45,7 +46,7 @@ public class MenuInicio extends Pantalla {
         camara.position.set(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, 0);
         camara.update();
 
-        fondo = new Texture(Gdx.files.internal("Fondos/fondoMenu.png"));
+        fondo = Imagenes.getFondoMenu();
         fondo.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
         layout = new GlyphLayout();

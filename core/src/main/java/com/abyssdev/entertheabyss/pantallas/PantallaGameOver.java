@@ -1,6 +1,7 @@
 package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.ui.FontManager;
+import com.abyssdev.entertheabyss.ui.Imagenes;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -54,7 +55,7 @@ public class PantallaGameOver extends Pantalla {
         camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
         camara.update();
 
-        fondoPausa = new Texture("Fondos/gameover.png");
+        fondoPausa = Imagenes.getFondoGameOver();
         layout = new GlyphLayout();
 
         Sonidos.reproducirMusicaDerrota();

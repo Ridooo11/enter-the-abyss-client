@@ -39,11 +39,11 @@ public class Hud {
     public Hud(Jugador jugador, Viewport viewport) {
         this.jugador = jugador;
         this.viewport = viewport;
-        this.heart100 = new Texture("imagenes/corazon100%.png");
-        this.heart75 = new Texture("imagenes/corazon75%.png");
-        this.heart50 = new Texture("imagenes/corazon50%.png");
-        this.heart25 = new Texture("imagenes/corazon25%.png");
-        this.moneda = new Texture("imagenes/moneda.png");
+        this.heart100 = Imagenes.getCorazon100();
+        this.heart75 =Imagenes.getCorazon75();
+        this.heart50 = Imagenes.getCorazon50();
+        this.heart25 = Imagenes.getCorazon25();
+        this.moneda = Imagenes.getMoneda();
         this.font = FontManager.getInstance().getPequena();
         this.layout = new GlyphLayout();
     }

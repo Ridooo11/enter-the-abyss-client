@@ -2,6 +2,7 @@ package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.logica.OpcionesInputHandler;
 import com.abyssdev.entertheabyss.ui.FontManager;
+import com.abyssdev.entertheabyss.ui.Imagenes;
 import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.GL20;
@@ -110,7 +111,7 @@ public class PantallaOpciones extends Pantalla {
 
 
 
-        fondo = new Texture(Gdx.files.internal("Fondos/fondoMenu.png"));
+        fondo = Imagenes.getFondoMenu();
         fondo.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
         inputHandler = new OpcionesInputHandler(

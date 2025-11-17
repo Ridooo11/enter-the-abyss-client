@@ -2,6 +2,7 @@ package com.abyssdev.entertheabyss;
 
 import com.abyssdev.entertheabyss.pantallas.MenuInicio;
 import com.abyssdev.entertheabyss.pantallas.PantallaWin;
+import com.abyssdev.entertheabyss.ui.Imagenes;
 import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -16,6 +17,9 @@ public class EnterTheAbyssPrincipal extends Game {
     public void create() {
         batch = new SpriteBatch();
 
+
+        // ✅ CARGAR TODAS LAS IMÁGENES UNA SOLA VEZ
+        Imagenes.cargar();
         // Inicializar preferencias
         prefs = Gdx.app.getPreferences("EnterTheAbyss_Settings");
 
@@ -45,6 +49,7 @@ public class EnterTheAbyssPrincipal extends Game {
         }
         batch.dispose();
         Sonidos.dispose();
+        Imagenes.dispose(); // ✅ LIBERAR IMÁGENES
     }
 
 

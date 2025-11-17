@@ -10,11 +10,11 @@ public abstract class Habilidad {
     protected Texture icono;
     public boolean comprada = false;
 
-    public Habilidad(String nombre, String descripcion, int costo, String rutaIcono) {
+    public Habilidad(String nombre, String descripcion, int costo, Texture textura) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.costo = costo;
-        this.icono = new Texture(rutaIcono);
+        this.icono = textura;
     }
 
     public abstract void aplicar(Jugador jugador);

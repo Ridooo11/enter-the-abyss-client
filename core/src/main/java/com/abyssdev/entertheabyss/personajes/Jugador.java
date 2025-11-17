@@ -3,6 +3,7 @@ package com.abyssdev.entertheabyss.personajes;
 import com.abyssdev.entertheabyss.habilidades.*;
 import com.abyssdev.entertheabyss.personajes.Accion;
 import com.abyssdev.entertheabyss.personajes.Direccion;
+import com.abyssdev.entertheabyss.ui.Imagenes;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -72,7 +73,7 @@ public class Jugador {
         this.posicion = new Vector2(x, y);
         this.hitbox = new Rectangle(x, y, ancho, alto);
 
-        hojaSprite = new Texture("personajes/player.png");
+        hojaSprite = Imagenes.getSpriteJugador();
         inicializarMapaFilas();
         cargarAnimaciones();
 

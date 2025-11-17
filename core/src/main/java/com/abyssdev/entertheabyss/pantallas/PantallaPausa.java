@@ -2,6 +2,7 @@ package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.abyssdev.entertheabyss.ui.FontManager;
+import com.abyssdev.entertheabyss.ui.Imagenes;
 import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -47,7 +48,7 @@ public class PantallaPausa extends Pantalla {
 
         camara = new OrthographicCamera();
         viewport = new FitViewport(1280, 720, camara);
-        fondoPausa = new Texture("Fondos/pausa2.PNG");
+        fondoPausa = Imagenes.getFondoPausa();
         layout = new GlyphLayout();
     }
 

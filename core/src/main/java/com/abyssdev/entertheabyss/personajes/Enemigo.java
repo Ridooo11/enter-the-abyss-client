@@ -1,5 +1,6 @@
 package com.abyssdev.entertheabyss.personajes;
 
+import com.abyssdev.entertheabyss.ui.Imagenes;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
@@ -38,7 +39,7 @@ public class Enemigo {
     protected Animation<TextureRegion> animMuerte;
 
     public Enemigo(float x, float y, float velocidadEnemigo, float coldown, int danio) {
-        this.hojaSprite = new Texture("personajes/esqueletoEnemigo.png");
+        this.hojaSprite = Imagenes.getSpriteEnemigo();
         this.posicion = new Vector2(x, y);
         this.velocidad = new Vector2(0, 0);
         this.danio = danio;

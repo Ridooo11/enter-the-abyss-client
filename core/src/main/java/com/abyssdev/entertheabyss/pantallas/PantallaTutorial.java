@@ -1,6 +1,7 @@
 package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.ui.FontManager;
+import com.abyssdev.entertheabyss.ui.Imagenes;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -14,6 +15,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
+import java.awt.*;
 
 public class PantallaTutorial extends Pantalla {
 
@@ -63,11 +66,11 @@ public class PantallaTutorial extends Pantalla {
     private void cargarSlides() {
         // Define cuántos slides tenés
         slides = new Texture[] {
-            new Texture("tutoriales/movimiento.png"),
-            new Texture("tutoriales/combate.png"),
-            new Texture("Tutoriales/ogrini.jpg"),
-            new Texture("tutoriales/arbol.png"),
-            new Texture("Fondos/Win1.jpg")
+            Imagenes.getTutorialMovimiento(),
+            Imagenes.getTutorialCombate(),
+            Imagenes.getTutorialOgrini(),
+            Imagenes.getTutorialArbol(),
+            Imagenes.getTutorialObjetivo()
         };
 
 

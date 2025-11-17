@@ -2,6 +2,7 @@ package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.abyssdev.entertheabyss.ui.FontManager;
+import com.abyssdev.entertheabyss.ui.Imagenes;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -53,7 +54,7 @@ public class PantallaWin extends Pantalla {
         camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
         camara.update();
 
-        fondoPausa = new Texture("Fondos/Win1.jpg");
+        fondoPausa = Imagenes.getFondoWin();
         layout = new GlyphLayout();
 
 

@@ -2,6 +2,7 @@ package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.personajes.Jugador;
 import com.abyssdev.entertheabyss.ui.FontManager;
+import com.abyssdev.entertheabyss.ui.Imagenes;
 import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -64,9 +65,9 @@ public class PantallaTienda extends Pantalla {
         camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
         camara.update();
 
-        fondoTienda = new Texture("Fondos/OgroTienda.png");
-        heart100 = new Texture("imagenes/corazon100%.png");
-        moneda = new Texture("imagenes/moneda.png");
+        fondoTienda = Imagenes.getFondoTienda();
+        heart100 = Imagenes.getCorazon100();
+        moneda = Imagenes.getMoneda();
 
         System.out.println("✅ Tienda cargada correctamente (SERVIDOR)");
     }
