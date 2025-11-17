@@ -1,5 +1,6 @@
 package com.abyssdev.entertheabyss.pantallas;
 
+import com.abyssdev.entertheabyss.network.ClientThread;
 import com.abyssdev.entertheabyss.ui.FontManager;
 import com.abyssdev.entertheabyss.ui.Imagenes;
 import com.badlogic.gdx.Game;
@@ -138,8 +139,21 @@ public class PantallaGameOver extends Pantalla {
                 case 1: // Salir
                     System.out.println("👋 Saliendo del juego desde Game Over");
 
-                    // ✅ DESCONECTAR ANTES DE SALIR
+                    // ✅ DESCONECTAR DE FORMA SÍNCRONA
                     if (pantallaJuegoAnterior != null) {
+                        ClientThread clientThread = pantallaJuegoAnterior.getClientThread();
+                        if (clientThread != null) {
+                            System.out.println("📡 Enviando Disconnect...");
+                            clientThread.sendMessage("Disconnect");
+
+                            // ✅ Esperar a que el mensaje se envíe
+                            try {
+                                Thread.sleep(300);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
                         pantallaJuegoAnterior.dispose();
                     }
 

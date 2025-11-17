@@ -954,6 +954,13 @@ public class PantallaJuego extends Pantalla implements GameController {
             }
         }
 
+        Gdx.app.postRunnable(() -> {
+
+            if (mapaActual != null) {
+                mapaActual.dispose();
+            }
+        });
+
         // Limpiar recursos
         if (mapaActual != null) {
             mapaActual.dispose();

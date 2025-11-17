@@ -1,6 +1,7 @@
 package com.abyssdev.entertheabyss;
 
 import com.abyssdev.entertheabyss.pantallas.MenuInicio;
+import com.abyssdev.entertheabyss.pantallas.PantallaJuego;
 import com.abyssdev.entertheabyss.pantallas.PantallaWin;
 import com.abyssdev.entertheabyss.ui.Imagenes;
 import com.abyssdev.entertheabyss.ui.Sonidos;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 public class EnterTheAbyssPrincipal extends Game {
     public SpriteBatch batch; // SpriteBatch usado por todas las pantallas que va a tener el juego
     private Preferences prefs;
+    private Thread shutdownHook;
 
     @Override
     public void create() {
@@ -34,12 +36,28 @@ public class EnterTheAbyssPrincipal extends Game {
         // Arrancar en el menú
         setScreen(new MenuInicio(this,batch));
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("🛑 Ventana cerrada, limpiando recursos...");
-            if (getScreen() != null) {
-                getScreen().dispose();
+        shutdownHook = new Thread(() -> {
+            System.out.println("🛑 Ventana cerrada detectada - Desconectando...");
+
+            // Desconectar si es PantallaJuego
+            if (getScreen() instanceof PantallaJuego) {
+                PantallaJuego pantallaJuego = (PantallaJuego) getScreen();
+
+                // Forzar desconexión inmediata
+                if (pantallaJuego.getClientThread() != null) {
+                    try {
+                        pantallaJuego.getClientThread().sendMessage("Disconnect");
+                        Thread.sleep(200); // Esperar a que el mensaje se envíe
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-        }));
+
+            System.out.println("✅ Desconexión completada");
+        });
+
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
     }
 
     @Override
@@ -50,6 +68,14 @@ public class EnterTheAbyssPrincipal extends Game {
         batch.dispose();
         Sonidos.dispose();
         Imagenes.dispose(); // ✅ LIBERAR IMÁGENES
+
+        try {
+            if (shutdownHook != null) {
+                Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            }
+        } catch (IllegalStateException e) {
+            // Ya se está ejecutando el shutdown
+        }
     }
 
 
