@@ -235,9 +235,8 @@ public class Jugador {
     }
 
     public void dispose() {
-        if (hojaSprite != null) {
-            hojaSprite.dispose();
-        }
+
+
     }
 
     // ==================== GETTERS ====================

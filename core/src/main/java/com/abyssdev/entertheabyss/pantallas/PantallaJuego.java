@@ -958,8 +958,7 @@ public class PantallaJuego extends Pantalla implements GameController {
         if (mapaActual != null) {
             mapaActual.dispose();
         }
-        /*hud.dispose();
-        }*/
+
         for (Jugador jugador : jugadores.values()) {
             jugador.dispose();
         }
@@ -970,6 +969,8 @@ public class PantallaJuego extends Pantalla implements GameController {
         yaInicializado = false;
         conectado = false;
         juegoIniciado = false;
+
+
 
         System.out.println("🔴 Cliente completamente desconectado");
     }
