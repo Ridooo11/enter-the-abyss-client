@@ -66,8 +66,8 @@ public class EnterTheAbyssPrincipal extends Game {
             getScreen().dispose();
         }
         batch.dispose();
-        Sonidos.dispose();
-        Imagenes.dispose(); // ✅ LIBERAR IMÁGENES
+        Sonidos.disposeCompletamente();
+        Imagenes.dispose();
 
         try {
             if (shutdownHook != null) {

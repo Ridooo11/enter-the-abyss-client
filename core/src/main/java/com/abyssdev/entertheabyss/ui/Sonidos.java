@@ -8,7 +8,7 @@ public class Sonidos {
 
     // ✅ Música
     private static Music musicaMenu;
-    private static Music musicaJuego;
+    //private static Music musicaJuego;
     private static Music musicaDerrota; // ✅ Nueva
 
     // ✅ Efectos
@@ -22,12 +22,12 @@ public class Sonidos {
     public static void cargar() {
         // Música
         musicaMenu = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica/menu.mp3"));
-        musicaJuego = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica/juego.mp3"));
+        //musicaJuego = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica/juego.mp3"));
         musicaDerrota = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica/game_over.mp3")); // ✅ Cargar
 
         // Configurar música
         musicaMenu.setLooping(true);
-        musicaJuego.setLooping(true);
+        //musicaJuego.setLooping(true);
         musicaDerrota.setLooping(false); // ✅ No repetir en Game Over
 
         // Efectos
@@ -73,7 +73,7 @@ public class Sonidos {
     public static void setVolumenMusica(float volumen) {
         volumenMusica = Math.max(0f, Math.min(1f, volumen));
         if (musicaMenu != null) musicaMenu.setVolume(volumenMusica);
-        if (musicaJuego != null) musicaJuego.setVolume(volumenMusica);
+        //if (musicaJuego != null) musicaJuego.setVolume(volumenMusica);
         if (musicaDerrota != null) musicaDerrota.setVolume(volumenMusica);
     }
 
@@ -89,60 +89,162 @@ public class Sonidos {
         return volumenEfectos;
     }
 
-    // ✅ MODIFICAR tus métodos existentes para usar el volumen
     public static void reproducirMusicaMenu() {
         detenerTodaMusica();
-        if (musicaMenu == null) {
-            musicaMenu = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica_menu.mp3"));
+
+        // ✅ NUEVO: Recrear si está disposed
+        try {
+            if (musicaMenu == null || !musicaMenu.isPlaying()) {
+                musicaMenu = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica/menu.mp3"));
+                musicaMenu.setLooping(true);
+            }
+            musicaMenu.setVolume(volumenMusica);
+            musicaMenu.play();
+        } catch (Exception e) {
+            System.err.println("⚠️ Error reproduciendo música menú: " + e.getMessage());
+            // Intentar recargar
+            try {
+                musicaMenu = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica/menu.mp3"));
+                musicaMenu.setLooping(true);
+                musicaMenu.setVolume(volumenMusica);
+                musicaMenu.play();
+            } catch (Exception e2) {
+                System.err.println("❌ No se pudo recuperar música menú");
+            }
         }
-        musicaMenu.setLooping(true);
-        musicaMenu.setVolume(volumenMusica); // ⬅️ AGREGAR ESTA LÍNEA
-        musicaMenu.play();
     }
 
-    public static void reproducirMusicaJuego() {
+   public static void reproducirMusicaJuego() {
         detenerTodaMusica();
-        if (musicaJuego == null) {
-            musicaJuego = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica_juego.mp3"));
-        }
-        musicaJuego.setLooping(true);
-        musicaJuego.setVolume(volumenMusica); // ⬅️ AGREGAR ESTA LÍNEA
-        musicaJuego.play();
+
+        /*//
+        try {
+            if (musicaJuego == null || !musicaJuego.isPlaying()) {
+                musicaJuego = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica/juego.mp3"));
+                musicaJuego.setLooping(true);
+            }
+            musicaJuego.setVolume(volumenMusica);
+            musicaJuego.play();
+        } catch (Exception e) {
+            System.err.println("⚠️ Error reproduciendo música juego: " + e.getMessage());
+            // Intentar recargar
+            try {
+                musicaJuego = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica/juego.mp3"));
+                musicaJuego.setLooping(true);
+                musicaJuego.setVolume(volumenMusica);
+                musicaJuego.play();
+            } catch (Exception e2) {
+                System.err.println("❌ No se pudo recuperar música juego");
+            }
+        }*/
     }
 
     public static void reproducirMusicaDerrota() {
         detenerTodaMusica();
-        if (musicaDerrota == null) {
-            musicaDerrota = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica_derrota.mp3"));
+
+        // ✅ NUEVO: Recrear si está disposed
+        try {
+            if (musicaDerrota == null) {
+                musicaDerrota = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica/game_over.mp3"));
+                musicaDerrota.setLooping(false);
+            }
+            musicaDerrota.setVolume(volumenMusica);
+            musicaDerrota.play();
+        } catch (Exception e) {
+            System.err.println("⚠️ Error reproduciendo música derrota: " + e.getMessage());
+            try {
+                musicaDerrota = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica/game_over.mp3"));
+                musicaDerrota.setLooping(false);
+                musicaDerrota.setVolume(volumenMusica);
+                musicaDerrota.play();
+            } catch (Exception e2) {
+                System.err.println("❌ No se pudo recuperar música derrota");
+            }
         }
-        musicaDerrota.setLooping(false);
-        musicaDerrota.setVolume(volumenMusica); // ⬅️ AGREGAR ESTA LÍNEA
-        musicaDerrota.play();
     }
 
     public static void pausarMusicaJuego() {
-        if (musicaJuego != null && musicaJuego.isPlaying()) {
+        /*if (musicaJuego != null && musicaJuego.isPlaying()) {
             musicaJuego.pause();
-        }
+        }*/
     }
 
     public static void reanudarMusicaJuego() {
-        if (musicaJuego != null && !musicaJuego.isPlaying()) {
+        /*if (musicaJuego != null && !musicaJuego.isPlaying()) {
             musicaJuego.play();
-        }
+        }*/
     }
 
     public static void detenerTodaMusica() {
-        musicaMenu.stop();
-        musicaJuego.stop();
-        musicaDerrota.stop();
+        try {
+            if (musicaMenu != null && musicaMenu.isPlaying()) {
+                musicaMenu.stop();
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Error deteniendo música menú");
+        }
+
+        /*try {
+            if (musicaJuego != null && musicaJuego.isPlaying()) {
+                musicaJuego.stop();
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Error deteniendo música juego");
+        }*/
+
+        try {
+            if (musicaDerrota != null && musicaDerrota.isPlaying()) {
+                musicaDerrota.stop();
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Error deteniendo música derrota");
+        }
     }
 
     public static void dispose() {
-        if (musicaMenu != null) musicaMenu.dispose();
-        if (musicaJuego != null) musicaJuego.dispose();
-        if (musicaDerrota != null) musicaDerrota.dispose(); // ✅ Liberar
-        if (sonidoAtaque != null) sonidoAtaque.dispose();
-        if (sonidoPuerta != null) sonidoPuerta.dispose();
+
+    }
+
+    public static void disposeCompletamente() {
+        System.out.println("🧹 Liberando TODOS los sonidos...");
+
+        detenerTodaMusica();
+
+        if (musicaMenu != null) {
+            musicaMenu.dispose();
+            musicaMenu = null;
+        }
+        /*if (musicaJuego != null) {
+            musicaJuego.dispose();
+            musicaJuego = null;
+        }*/
+        if (musicaDerrota != null) {
+            musicaDerrota.dispose();
+            musicaDerrota = null;
+        }
+        if (sonidoAtaque != null) {
+            sonidoAtaque.dispose();
+            sonidoAtaque = null;
+        }
+        if (sonidoPuerta != null) {
+            sonidoPuerta.dispose();
+            sonidoPuerta = null;
+        }
+        if (compraExitosa != null) {
+            compraExitosa.dispose();
+            compraExitosa = null;
+        }
+        if (compraFallida != null) {
+            compraFallida.dispose();
+            compraFallida = null;
+        }
+        if (sonidoEvasion != null) {
+            sonidoEvasion.dispose();
+            sonidoEvasion = null;
+        }
+        if (sonidoVictoria != null) {
+            sonidoVictoria.dispose();
+            sonidoVictoria = null;
+        }
     }
 }

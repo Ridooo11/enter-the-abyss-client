@@ -22,7 +22,7 @@ public class PantallaGameOver extends Pantalla {
     private BitmapFont font;
     private Texture fondoPausa;
 
-    private final String[] opciones = {"Volver al Menu","Salir"};
+    private final String[] opciones = {"Volver al Menu"};
     private int opcionSeleccionada = 0;
 
     private float tiempoParpadeo = 0;
@@ -123,44 +123,38 @@ public class PantallaGameOver extends Pantalla {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             switch (opcionSeleccionada) {
-                case 0: // Volver al Menu
-                    System.out.println("🔙 Volviendo al menú desde Game Over");
-                    Sonidos.detenerTodaMusica();
-                    Sonidos.reproducirMusicaMenu();
-
-                    // ✅ DESCONECTAR ANTES DE CAMBIAR DE PANTALLA
-                    if (pantallaJuegoAnterior != null) {
-                        pantallaJuegoAnterior.dispose();
-                    }
-
-                    juego.setScreen(new MenuInicio(juego, batch));
-                    break;
-
-                case 1: // Salir
-                    System.out.println("👋 Saliendo del juego desde Game Over");
-
-                    // ✅ DESCONECTAR DE FORMA SÍNCRONA
-                    if (pantallaJuegoAnterior != null) {
-                        ClientThread clientThread = pantallaJuegoAnterior.getClientThread();
-                        if (clientThread != null) {
-                            System.out.println("📡 Enviando Disconnect...");
-                            clientThread.sendMessage("Disconnect");
-
-                            // ✅ Esperar a que el mensaje se envíe
-                            try {
-                                Thread.sleep(300);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        pantallaJuegoAnterior.dispose();
-                    }
-
-                    Gdx.app.exit();
+                case 0:
+                    volverAlMenu();
                     break;
             }
         }
+    }
+
+    private void volverAlMenu() {
+        System.out.println("🔙 Volviendo al menú desde GameOver");
+
+        // ✅ NUEVO: Detener música pero NO dispose
+        Sonidos.detenerTodaMusica();
+
+        // ✅ NUEVO: Limpiar pantalla de juego ANTES de cambiar
+        if (pantallaJuegoAnterior != null) {
+            System.out.println("🧹 Limpiando PantallaJuego anterior...");
+            pantallaJuegoAnterior.dispose();
+            pantallaJuegoAnterior = null;
+        }
+
+        // Esperar a que se limpie todo
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Reproducir música del menú
+        Sonidos.reproducirMusicaMenu();
+
+        // Cambiar de pantalla
+        juego.setScreen(new MenuInicio(juego, batch));
     }
 
     @Override

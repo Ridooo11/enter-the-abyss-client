@@ -25,7 +25,7 @@ public class PantallaWin extends Pantalla {
     private BitmapFont font;
     private Texture fondoPausa;
 
-    private final String[] opciones = {"Volver al Menu","Salir"};
+    private final String[] opciones = {"Volver al Menu"};
     private int opcionSeleccionada = 0;
 
     private float tiempoParpadeo = 0;
@@ -44,6 +44,8 @@ public class PantallaWin extends Pantalla {
         super(juego,batch);
         this.pantallaJuegoAnterior = pantallaJuego;
     }
+
+
 
     @Override
     public void show() {
@@ -125,44 +127,39 @@ public class PantallaWin extends Pantalla {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             switch (opcionSeleccionada) {
                 case 0:
-                    System.out.println("🔙 Volviendo al menú desde Win");
-                    Sonidos.detenerTodaMusica();
-                    Sonidos.reproducirMusicaMenu();
-
-                    // ✅ DESCONECTAR ANTES DE CAMBIAR DE PANTALLA
-                    if (pantallaJuegoAnterior != null) {
-                        pantallaJuegoAnterior.dispose();
-                    }
-
-                    juego.setScreen(new MenuInicio(juego, batch));
-                    break;
-                case 1: // Salir
-                    System.out.println("👋 Saliendo del juego desde Win");
-
-                    // ✅ DESCONECTAR DE FORMA SÍNCRONA
-                    if (pantallaJuegoAnterior != null) {
-                        ClientThread clientThread = pantallaJuegoAnterior.getClientThread();
-                        if (clientThread != null) {
-                            System.out.println("📡 Enviando Disconnect...");
-                            clientThread.sendMessage("Disconnect");
-
-                            // ✅ Esperar a que el mensaje se envíe
-                            try {
-                                Thread.sleep(300);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        pantallaJuegoAnterior.dispose();
-                    }
-
-                    Gdx.app.exit();
+                    volverAlMenu();
                     break;
             }
         }
 
 
+    }
+
+    private void volverAlMenu() {
+        System.out.println("🔙 Volviendo al menú desde Win");
+
+        // ✅ Detener música pero NO dispose
+        Sonidos.detenerTodaMusica();
+
+        // ✅ Limpiar pantalla de juego ANTES de cambiar
+        if (pantallaJuegoAnterior != null) {
+            System.out.println("🧹 Limpiando PantallaJuego anterior...");
+            pantallaJuegoAnterior.dispose();
+            pantallaJuegoAnterior = null;
+        }
+
+        // Esperar a que se limpie todo
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Reproducir música del menú
+        Sonidos.reproducirMusicaMenu();
+
+        // Cambiar de pantalla
+        juego.setScreen(new MenuInicio(juego, batch));
     }
 
     @Override

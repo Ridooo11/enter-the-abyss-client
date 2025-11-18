@@ -5,7 +5,7 @@ import com.abyssdev.entertheabyss.ui.Imagenes;
 
 public class HabilidadDefensa extends Habilidad {
     public HabilidadDefensa() {
-        super("Defensa", "Reduce el daño recibido.", 25, Imagenes.getIconoEscudo());
+        super("Defensa", "Reduce el daño recibido.", 40, Imagenes.getIconoEscudo());
     }
 
     @Override

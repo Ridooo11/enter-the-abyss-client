@@ -5,7 +5,7 @@ import com.abyssdev.entertheabyss.ui.Imagenes;
 
 public class HabilidadRegeneracion extends Habilidad {
     public HabilidadRegeneracion() {
-        super("Regeneración", "Regenera salud lentamente.", 35, Imagenes.getIconoCorazonDorado());
+        super("Regeneración", "Regenera salud lentamente.", 60, Imagenes.getIconoCorazonDorado());
     }
 
     @Override

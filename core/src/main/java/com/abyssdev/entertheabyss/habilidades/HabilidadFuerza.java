@@ -5,7 +5,7 @@ import com.abyssdev.entertheabyss.ui.Imagenes;
 
 public class HabilidadFuerza extends Habilidad {
     public HabilidadFuerza() {
-        super("Fuerza", "Aumenta el daño de ataque.", 15, Imagenes.getIconoEspada());
+        super("Fuerza", "Aumenta el daño de ataque.", 20, Imagenes.getIconoEspada());
     }
 
     @Override

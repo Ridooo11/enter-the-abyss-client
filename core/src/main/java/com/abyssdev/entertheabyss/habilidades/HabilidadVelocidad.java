@@ -6,7 +6,7 @@ public class HabilidadVelocidad extends Habilidad {
     public HabilidadVelocidad() {
         super("Velocidad",
             "Aumenta la velocidad del jugador.",
-            15 ,
+            20 ,
             Imagenes.getIconoBotas());
     }
 

@@ -128,10 +128,10 @@ public class PantallaPausa extends Pantalla {
                     juego.setScreen(new PantallaTutorial(juego, batch, this));
                     break;
                 case 3:
-                    pantallaJuego.dispose();
-
                     Sonidos.detenerTodaMusica();
                     Sonidos.reproducirMusicaMenu();
+                    pantallaJuego.dispose();
+
                     juego.setScreen(new MenuInicio(juego, batch));
                     break;
             }

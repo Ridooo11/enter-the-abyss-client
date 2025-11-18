@@ -5,7 +5,7 @@ import com.abyssdev.entertheabyss.ui.Imagenes;
 
 public class HabilidadAtaqueVeloz extends Habilidad {
     public HabilidadAtaqueVeloz() {
-        super("Ataque Veloz", "Aumenta la velocidad de ataque.", 25, Imagenes.getIconoEspadaDoble());
+        super("Ataque Veloz", "Aumenta la velocidad de ataque.", 40, Imagenes.getIconoEspadaDoble());
     }
 
     @Override

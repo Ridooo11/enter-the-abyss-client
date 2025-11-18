@@ -5,7 +5,7 @@ import com.abyssdev.entertheabyss.ui.Imagenes;
 
 public class HabilidadEvasion extends Habilidad {
     public HabilidadEvasion() {
-        super("Evasión", "Permite esquivar ataques rodando.", 35, Imagenes.getIconoBotasDoradas());
+        super("Evasión", "Permite esquivar ataques rodando.", 60, Imagenes.getIconoBotasDoradas());
     }
 
     @Override
